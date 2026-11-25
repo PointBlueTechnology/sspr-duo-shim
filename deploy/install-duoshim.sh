@@ -83,14 +83,21 @@ LINE="CATALINA_OPTS=\"\$CATALINA_OPTS -Dduoshim.config=$CONFIG\""
 if [ -f "$SETENV" ] && grep -q 'duoshim.config' "$SETENV"; then
   echo "setenv.sh already sets duoshim.config: left unchanged"
 else
+  NEW_SETENV=1
   if [ -f "$SETENV" ]; then
+    NEW_SETENV=0
     run cp -p "$SETENV" "$SETENV.bak-$(date +%Y%m%d%H%M%S)"
   fi
   if [ "$DRY" = 1 ]; then
     echo "DRY-RUN: append to $SETENV: $LINE"
   else
+    # Appending keeps the existing owner and mode. A new setenv.sh is root-owned and
+    # group-readable so the Tomcat user can't change its own startup options.
     printf '\n# sspr-duo-shim configuration file\n%s\n' "$LINE" >> "$SETENV"
-    [ "$IS_ROOT" = 1 ] && chown "$TUSER:$TGROUP" "$SETENV"
+    if [ "$NEW_SETENV" = 1 ]; then
+      chmod 750 "$SETENV"
+      [ "$IS_ROOT" = 1 ] && chown "root:$TGROUP" "$SETENV"
+    fi
   fi
   echo "setenv.sh: added -Dduoshim.config=$CONFIG"
 fi
