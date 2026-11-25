@@ -13,7 +13,7 @@ SSPR's *External OAuth Authentication* verification method expects an OAuth serv
 - [Clustering](#clustering) and [active/standby](#high-availability-activestandby)
 - [Upgrades](#upgrades)
 - [Troubleshooting](#troubleshooting)
-- [What was verified against SSPR](#what-was-verified-against-sspr)
+- [SSPR compatibility](#sspr-compatibility)
 - [Security](SECURITY.md)
 
 ## How it works
@@ -129,7 +129,7 @@ Why the Login URL ends in `/auth` on 4.7 and 4.8: SSPR 4.8 builds the `/sign` UR
    - **SSO ▸ OAuth ▸ OAuth Profile / UserInfo Service Method Type** (4.8): `POST` or `GET` both work.
    - The *Inject User Name Value* must also resolve to the same user through SSPR's **LDAP Username Search Filter**. SSPR looks up the returned username that way and compares the DN with the user found on the search page. For example, if the macro is `@LDAP:mail@`, the username search filter must match `mail`.
 
-The shim never returns an `id_token`. That keeps SSPR 4.8 out of its OIDC branch, which would read the username using the **SSO** profile's attribute name instead of the Forgotten Password profile's. It is also why the separate `SSPR-oauth/patch` bytecode fix is not needed with the shim.
+The shim never returns an `id_token`. That keeps SSPR 4.8 out of its OIDC branch, which would read the username using the **SSO** profile's attribute name instead of the Forgotten Password profile's.
 
 ## Network requirements
 
@@ -223,7 +223,7 @@ location /duoshim/ {
 
 ## Upgrades
 
-- **SSPR upgrades:** the shim depends on SSPR's OAuth client behaviour, not on SSPR code. After any SSPR upgrade, re-check `password/pwm/http/servlet/oauth/OAuthMachine.class` (see [What was verified](#what-was-verified-against-sspr)). Especially check how the `/sign` URL is derived, the token-response parsing (`id_token` handling), and the userinfo method. Then run one reset end to end.
+- **SSPR upgrades:** the shim depends on SSPR's OAuth client behaviour, not on SSPR code. After any SSPR upgrade, run one reset end to end and confirm the shim's audit log shows `sign`, `grant`, `duo_callback`, `token` and `userinfo`. If it fails, compare with [SSPR compatibility](#sspr-compatibility): especially how the `/sign` URL is derived, the token-response handling (`id_token`) and the userinfo method.
 - **Moving to Tomcat 10+:** SSPR itself must move to `jakarta.*` first. The shim would need a jakarta build (rename the imports, swap the servlet API dependency).
 - **Duo SDK:** bump `duo.sdk.version` in `pom.xml`, run `mvn clean package` (the tests use a fake Duo), then test against Duo.
 - **Shim upgrades:** replace `duoshim.war`. The configuration file stays where it is, and in-flight transactions are lost (see above).
@@ -248,37 +248,32 @@ Start with the shim's audit log (`event=… user="…" result=… ip=…`) and `
 | Duo approves, then SSPR shows the username screen again. Audit has `duo_callback … result=allow` but no `token` line; SSPR log: `read state … match=false` / `response is not for a request issued during the current session` | The reset was started on a different host name (IP address, short name, old name) than SSPR's **Site URL**. SSPR sends the browser back to the Site URL host, where the browser has no SSPR session cookie. | Open SSPR only at the Site URL host, for example `https://sspr-test.pointbluetech.com:8443/sspr/public/forgottenpassword`. Optionally redirect other names to it at the proxy. |
 | After an unfinished attempt (Duo denied an unenrolled user, or the Duo window was closed), the shim shows *Your last Duo verification did not finish*; audit `repeat_choice` | Expected. SSPR keeps the forgotten-password attempt open and sends the user straight back to the shim. Duo's deny page never returns, so SSPR doesn't know the attempt ended. | *Start over* (via `/oauth/startover`) voids the attempt, clears the shim's cookie and returns to SSPR's username page through SSPR's cancel path. *Try Duo again* opens a fresh Duo prompt. If the user just leaves, the next reset in that browser within 5 minutes also sees this page once. |
 | SSPR: *OAuth server did not respond with an username value for configured attribute* | `userinfo.attribute` ≠ SSPR's *OAuth User Name/DN Login Attribute* | Make them equal. |
-| SSPR: *oauth server username does not match previously identified user* | The injected value resolves, through SSPR's LDAP Username Search Filter, to a different DN than the one the search page found | Use an attribute the username search filter matches (for example `cn`). See also the DN-case fix in `SSPR-oauth/patch`. |
+| SSPR: *oauth server username does not match previously identified user* | The injected value resolves, through SSPR's LDAP Username Search Filter, to a different DN than the one the search page found | Use an attribute the username search filter matches (for example `cn`). |
 | SSPR: token error 400; audit `invalid_grant` | Code older than 60 s, or the redirect URI SSPR sent differs | Check clock and load; check Site URL. |
 | HTTP 429 or *Too many attempts* | Rate limit reached | Wait for `ratelimit.windowSeconds`, or tune the limits. |
 
-## What was verified against SSPR
+## SSPR compatibility
 
-The SSPR client behaviour was taken from disassembled `OAuthMachine`, `OAuthSettings`, `OAuthConsumerServlet`, `ForgottenPasswordServlet` and `AppProperty.properties` of two builds:
+How SSPR's OAuth client behaves for the Forgotten Password method, by version, and what the shim does about it:
 
-- **SSPR 4.5.0.1**, the compiled classes in the SSPR-DUO-UNIVERSAL reference repo (`lib/classes`).
-- **SSPR 4.8.0.600 build 478**, the WAR in the parent `SSPR-oauth` folder.
-
-| Behaviour | 4.5.0.1 | 4.8.0.600 | Shim |
+| Behaviour | 4.5.0.1 | 4.7.0.0 and 4.8.0.600 | Shim |
 |---|---|---|---|
 | `/sign` URL | Login URL with `/grant` replaced by `/sign` | Login URL up to and including the `/` before the last `/auth`, plus `sign` | Serves `/oauth/sign`; grant on both `/oauth/grant` and `/oauth/auth` |
-| `/sign` request | POST form `data=[{"username":…}]`, HTTP Basic | Same; Basic omitted if *Skip Authorization header* is on | Requires client auth |
+| `/sign` request | POST form `data=[{"username":…}]`, HTTP Basic | Same; 4.8 omits Basic if *Skip Authorization header* is on | Requires client auth |
 | `/sign` response | JSON `data` field | Same | `{"data":"<handle>"}` |
-| Browser redirect params | `client_id`, `response_type=code`, `state`, `redirect_uri`, `scope` (if set), `parameters` | Same plus `login_hint` (if set); `scope` always `openid` | Uses `client_id`, `redirect_uri`, `response_type`, `state`, `parameters`; ignores the rest |
-| Token request | POST form `code`, `grant_type`, `redirect_uri`, `client_id`, `client_secret` + Basic | Same; Basic omitted if skip is on | Accepts Basic or form credentials |
-| Token response | Reads `access_token`, `expires_in`, `refresh_token` | Parses JSON; if `id_token` is present, takes the username from it using the SSO attribute | Returns `access_token`, `token_type`, `expires_in`, **no `id_token`** |
-| Userinfo | POST, Bearer header + form `access_token`, `attributes` | POST, or GET with Bearer only when the global method type is GET | Accepts both; token from Bearer, or form field on POST |
-| Return check | Not checked | Resolves the returned username via LDAP and compares DNs exactly | Returns the injected value unchanged |
+| Browser redirect params | `client_id`, `response_type=code`, `state`, `redirect_uri`, `scope` (if set), `parameters` | Same; 4.8 adds `login_hint` (if set) and always sends `scope=openid` | Uses `client_id`, `redirect_uri`, `response_type`, `state`, `parameters`; ignores the rest |
+| Token request | POST form `code`, `grant_type`, `redirect_uri`, `client_id`, `client_secret` + Basic | Same; 4.8 omits Basic if skip is on | Accepts Basic or form credentials |
+| Token response | Reads `access_token`, `expires_in`, `refresh_token` | 4.8: if `id_token` is present, takes the username from it using the SSO attribute | Returns `access_token`, `token_type`, `expires_in`, **no `id_token`** |
+| Userinfo | POST, Bearer header + form `access_token`, `attributes` | 4.8: POST, or GET with Bearer only when the global method type is GET | Accepts both; token from Bearer, or form field on POST |
+| Return check | — | 4.8: resolves the returned username via LDAP and compares DNs exactly | Returns the injected value unchanged |
 
-**Where the original brief differed and the bytecode was followed:**
-- The brief described the `/grant` → `/sign` rule. That is 4.5 only; 4.8 needs a Login URL ending in `/auth`.
-- The brief had userinfo as POST only. 4.8 can send GET.
-- The token response must not include `id_token`, because of 4.8's OIDC branch.
+**Notes:**
+- On 4.7 and 4.8 the OAuth Login URL must end in `/auth`. The `/grant` form only works on 4.5.
+- The shim never returns an `id_token`, so 4.8 always takes the username from `/oauth/userinfo` and the Forgotten Password profile's attribute name.
 
-**SSPR 4.7.0.0** (lab, `sspr-server-4.7.0.0.jar`) was checked by its class-file strings only, not decompiled. Its `OAuthMachine` has the 4.8-style `/auth` (`lastIndexOf`) derivation, no `/grant` replace, no `id_token` handling, and POST-only userinfo, so the 4.8 settings above apply.
+**Tested end to end** on SSPR 4.8.0.600 (Tomcat 9.0.124, Java 11) with a real Duo Web SDK application: approved push, unenrolled user, denied push, timed-out push, and *Start over* after an unfinished attempt.
 
-**Not verified:**
-- A live end-to-end run against SSPR 4.8 and Duo. The tests use a fake Duo and simulated requests.
-- 4.8 builds other than 4.8.0.600.
+**Not tested end to end:**
+- SSPR 4.5 and 4.7, and 4.8 builds other than 4.8.0.600.
 - How SSPR's HTTP client handles the shim's TLS certificate without *OAuth Web Service Server Certificate* set.
 - The exact effect of Duo username normalisation on `preferred_username`.
