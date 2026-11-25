@@ -1,0 +1,50 @@
+# sspr-duo-shim configuration (example; no real values).
+#
+# Copy this file OUTSIDE the WAR, for example /etc/duoshim/duoshim.properties, and point Tomcat at it:
+#   CATALINA_OPTS="$CATALINA_OPTS -Dduoshim.config=/etc/duoshim/duoshim.properties"
+# or set the environment variable DUOSHIM_CONFIG. Make it readable by the Tomcat user only (chmod 600).
+# Any missing or invalid value stops the shim from starting; the reason is in the Tomcat log.
+
+# --- Duo "Web SDK" application (Duo Admin Panel > Applications > your Web SDK app) -----------
+# Client ID: 20 characters, starts with DI.
+duo.clientId=DIXXXXXXXXXXXXXXXXXX
+# Client secret: 40 characters. Treat as a password.
+duo.clientSecret=REPLACE_WITH_DUO_CLIENT_SECRET_40_CHARS_
+# API hostname, host name only (no https://).
+duo.apiHost=api-xxxxxxxx.duosecurity.com
+# Where Duo sends the browser back: this shim's /duo/callback on its public https URL.
+duo.redirectUri=https://sspr.example.com/duoshim/duo/callback
+
+# --- SSPR as the OAuth client (must match the SSPR Forgotten Password profile's OAuth settings) ---
+# "OAuth Client ID" in SSPR. Any value you choose.
+sspr.clientId=sspr-forgotten-password
+# "OAuth Shared Secret" in SSPR. Long random value, at least 16 characters, for example:
+#   openssl rand -base64 32
+sspr.clientSecret=REPLACE_WITH_A_LONG_RANDOM_SECRET
+# SSPR's OAuth return address, matched exactly: <SSPR Site URL>/public/oauth
+sspr.redirectUri=https://sspr.example.com/sspr/public/oauth
+# Optional: link shown on error pages when SSPR's own cancel link can't be used.
+# Default: derived from sspr.redirectUri as <...>/public/forgottenpassword
+#sspr.returnUrl=https://sspr.example.com/sspr/public/forgottenpassword
+
+# --- What /oauth/userinfo returns -----------------------------------------------------------
+# JSON attribute name holding the verified username. Must equal SSPR's
+# "OAuth User Name/DN Login Attribute" in the Forgotten Password profile.
+userinfo.attribute=username
+
+# --- Rate limits (fixed window). 0 disables a limit. -------------------------------------------
+ratelimit.windowSeconds=300
+# Attempts per username per window, applied separately at /oauth/sign and /oauth/grant.
+ratelimit.perUsername=5
+# /oauth/sign is called by the SSPR server, so its "source IP" is SSPR itself: keep this high.
+ratelimit.sign.perIp=300
+# /oauth/grant is reached by users' browsers.
+ratelimit.grant.perIp=30
+
+# --- Optional -----------------------------------------------------------------------------
+# How long a user has to finish the Duo prompt, in seconds (minimum 30).
+#transaction.ttlSeconds=300
+# Secure flag on the transaction cookie. Only set false on a non-TLS test system.
+#cookie.secure=true
+# Upper bound on entries per in-memory store (minimum 100).
+#store.maxEntries=10000
