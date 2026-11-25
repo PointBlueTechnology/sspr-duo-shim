@@ -10,7 +10,7 @@ SSPR's *External OAuth Authentication* verification method expects an OAuth serv
 - [Duo setup](docs/DUO-SETUP.md) (separate page)
 - [SSPR Forgotten Password settings](#sspr-forgotten-password-settings)
 - [Network requirements](#network-requirements)
-- [Clustering](#clustering)
+- [Clustering](#clustering) and [active/standby](#high-availability-activestandby)
 - [Upgrades](#upgrades)
 - [Troubleshooting](#troubleshooting)
 - [What was verified against SSPR](#what-was-verified-against-sspr)
@@ -53,6 +53,7 @@ The username that comes back to SSPR is always the one SSPR registered in step 1
 | `POST /oauth/sign` | SSPR server | Register the user to verify; returns a handle |
 | `GET /oauth/auth` (also `/oauth/grant`) | Browser | Start the Duo prompt |
 | `GET /duo/callback` | Browser (from Duo) | Finish the Duo prompt; redirect to SSPR with a code |
+| `GET /health` | Load balancer | 200 when the shim is up; `?duo=1` also checks Duo (503 if unreachable) |
 | `GET /oauth/startover` | Browser | "Start over" on the *did not finish* page: void the attempt, clear the cookie, return to SSPR's cancel path |
 | `POST /oauth/token` | SSPR server | Code → access token |
 | `GET` or `POST /oauth/userinfo` | SSPR server | Access token → verified username |
@@ -144,9 +145,81 @@ The host name in the **OAuth Login URL** and the host name in `duo.redirectUri` 
 
 **The shim keeps all state in memory on one node.** The SSPR server calls `/sign`, `/token` and `/userinfo`, which carry no browser cookie. The browser calls `/oauth/auth` and `/duo/callback`. All five must reach the **same shim instance**, and sticky sessions cannot arrange that for the server-to-server calls.
 
-- **Supported:** run exactly one shim instance and point every SSPR node at its one URL. That works with a clustered SSPR. The shim is light, and if it goes down only Duo-based forgotten password stops.
-- **Not supported as built:** several shim instances behind a load balancer. That needs a shared store (for example Redis or a database with an atomic get-and-delete, so codes stay single use). The stores are confined to `duoshim.store.ExpiringStore`, so that is a contained change.
-- A restart of the shim drops in-flight transactions. Affected users simply start the reset again.
+- **Supported:** one shim instance at a time, either on its own or as an [active/standby pair](#high-availability-activestandby). Every SSPR node points at the same shim URL, so this works with a clustered SSPR.
+- **Not supported as built:** several shim instances serving traffic at once (active/active). That needs a shared store, for example PostgreSQL or Redis with an atomic get-and-delete, so codes stay single use. The state is confined to `duoshim.store.ExpiringStore` and `RateLimiter`, so that is a contained change.
+- A restart or failover drops in-flight resets. Those users see a shim error page (the shim fails closed) and start the reset again.
+
+### High availability (active/standby)
+
+Run two shim instances with **exactly one receiving traffic at a time**. A load balancer, or a floating IP, switches to the standby when the active one fails its health check.
+
+**Layout.** Serve SSPR and the shim under **one public host name**: the shim's transaction cookie is per host, and SSPR's Site URL, the OAuth Login URL and `duo.redirectUri` must share that host. Route by path:
+
+| Path | Backend | Balancing |
+|---|---|---|
+| `/sspr/*` | All SSPR nodes | Sticky sessions (SSPR keeps forgotten-password progress in its HTTP session) |
+| `/duoshim/*` | Shim A (active), shim B (backup) | **One server at a time**, never round robin |
+
+The shim can be a second webapp in each SSPR node's Tomcat (as on the lab host), with only one copy receiving `/duoshim` traffic. Or it can run on separate hosts. SSPR's server-to-server calls (`/sign`, `/token`, `/userinfo`) use the same public URL, so they also go through the load balancer to the active shim. Each SSPR node must be able to reach that public URL.
+
+**Health check.**
+- `GET /duoshim/health` returns 200 `{"status":"ok"}` when the shim has started. If its configuration is invalid the webapp never starts, and Tomcat returns 404.
+- `GET /duoshim/health?duo=1` also checks that Duo is reachable with the configured credentials: 200 when it is, 503 `{"status":"degraded","duo":"unavailable"}` when it isn't. The Duo result is cached for 15 seconds, so frequent probes don't flood Duo.
+- Use plain `/health` for failover. Duo being unreachable affects both nodes equally, so failing over wouldn't help. Monitor `?duo=1` separately and alert on it.
+
+**Configuration on both nodes.**
+- Use an identical `duoshim.properties`: the same Duo client ID, secret and API host, the same `sspr.clientId`/`sspr.clientSecret`, and the same `duo.redirectUri` and `sspr.redirectUri` (the shared public host name). Install with `deploy/install-duoshim.sh` on each node.
+- Rotate secrets on both nodes together, and restart the standby first.
+- Behind a proxy, configure Tomcat's `RemoteIpValve` on both nodes so rate limits and the audit log see client IPs rather than the load balancer's.
+- Each node writes its own audit log. Ship both to the same log collector.
+
+**Failback.** When the active node comes back, switching back to it immediately drops the resets running on the standby a second time. If your load balancer supports it, stay on the standby until someone fails back deliberately.
+
+**HAProxy example.** The `stick on dst` lines are the usual HAProxy pattern for active/standby without automatic failback: once traffic moves to the backup, it stays there.
+
+```haproxy
+frontend https_in
+    bind :443 ssl crt /etc/haproxy/certs/sspr.pem
+    acl is_shim path_beg /duoshim/
+    use_backend duoshim if is_shim
+    default_backend sspr
+
+backend sspr
+    balance roundrobin
+    cookie SSPRNODE insert indirect nocache
+    server sspr1 10.0.0.11:8443 ssl verify required ca-file /etc/haproxy/lab-ca.pem check cookie s1
+    server sspr2 10.0.0.12:8443 ssl verify required ca-file /etc/haproxy/lab-ca.pem check cookie s2
+
+backend duoshim
+    option httpchk GET /duoshim/health
+    http-check expect status 200
+    stick-table type ip size 1 nopurge
+    stick on dst
+    server shim1 10.0.0.11:8443 ssl verify required ca-file /etc/haproxy/lab-ca.pem check
+    server shim2 10.0.0.12:8443 ssl verify required ca-file /etc/haproxy/lab-ca.pem check backup
+```
+
+**nginx example.** Open-source nginx only has passive health checks (`max_fails`/`fail_timeout`). Active checks against `/duoshim/health` need NGINX Plus or an external monitor. It also fails back automatically.
+
+```nginx
+upstream duoshim {
+    server 10.0.0.11:8443 max_fails=2 fail_timeout=15s;
+    server 10.0.0.12:8443 backup;
+}
+location /duoshim/ {
+    proxy_pass https://duoshim;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto https;
+}
+```
+
+**Floating IP instead of a load balancer.** With keepalived (VRRP) on two shim hosts, use a `vrrp_script` that runs `curl -fsk https://localhost:8443/duoshim/health`. Point the public name's `/duoshim` path at the virtual IP through your existing reverse proxy. Set `nopreempt` on the instances, so the VIP doesn't move back automatically.
+
+**Test the failover before relying on it.**
+1. Start a reset and complete it.
+2. Stop the active shim (`systemctl stop tomcat`, or undeploy `duoshim.war`) and confirm the load balancer marks it down.
+3. Start a new reset and complete it through the standby. Its audit log should show the five events.
+4. Start a reset, fail over in the middle of it, and confirm the user gets a shim error page and can start again.
 
 ## Upgrades
 

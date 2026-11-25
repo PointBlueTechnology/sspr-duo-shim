@@ -40,6 +40,10 @@
         <servlet-class>duoshim.servlet.StartOverServlet</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>health</servlet-name>
+        <servlet-class>duoshim.servlet.HealthServlet</servlet-class>
+    </servlet>
+    <servlet>
         <servlet-name>duoCallback</servlet-name>
         <servlet-class>duoshim.servlet.DuoCallbackServlet</servlet-class>
     </servlet>
@@ -65,6 +69,10 @@
     <servlet-mapping>
         <servlet-name>startOver</servlet-name>
         <url-pattern>/oauth/startover</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>health</servlet-name>
+        <url-pattern>/health</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>duoCallback</servlet-name>

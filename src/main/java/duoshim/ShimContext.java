@@ -29,6 +29,7 @@ public final class ShimContext {
     public static final Duration TOKEN_TTL = Duration.ofSeconds(60);
 
     private final ShimConfig config;
+    private final Clock clock;
     private final DuoGatewayFactory duo;
     private final Audit audit;
     private final ClientAuthenticator clientAuthenticator;
@@ -43,6 +44,7 @@ public final class ShimContext {
 
     public ShimContext(ShimConfig config, DuoGatewayFactory duo, Audit audit, Clock clock) {
         this.config = config;
+        this.clock = clock;
         this.duo = duo;
         this.audit = audit;
         this.clientAuthenticator = new ClientAuthenticator(config.ssprClientId(), config.ssprClientSecret());
@@ -77,6 +79,7 @@ public final class ShimContext {
     }
 
     public ShimConfig config() { return config; }
+    public Clock clock() { return clock; }
     public DuoGatewayFactory duo() { return duo; }
     public Audit audit() { return audit; }
     public ClientAuthenticator clientAuthenticator() { return clientAuthenticator; }
