@@ -30,10 +30,30 @@
         <maven.compiler.testRelease>17</maven.compiler.testRelease>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <duo.sdk.version>1.4.0</duo.sdk.version>
-        <!-- The Duo SDK's converter-jackson asks for 2.17.0; pinned to the same 2.17 line because the shim uses Jackson directly. -->
-        <jackson.version>2.17.2</jackson.version>
+        <!-- Jackson 2.18.x: 2.17.2 has open advisories in jackson-databind and jackson-core (OSV).
+             The BOM below aligns core, annotations and databind for the shim and the Duo SDK's converter. -->
+        <jackson.version>2.18.12</jackson.version>
+        <!-- okio 1.17.6 fixes CVE-2023-3635 (GzipSource DoS); the Duo SDK's OkHttp 3.14.9 pulls 1.17.2. -->
+        <okio.version>1.17.6</okio.version>
         <junit.version>5.11.4</junit.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${okio.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Servlet 4.0 (javax.*): Tomcat 9, same container as SSPR 4.8. -->
@@ -48,11 +68,17 @@
             <groupId>com.duosecurity</groupId>
             <artifactId>duo-universal-sdk</artifactId>
             <version>${duo.sdk.version}</version>
+            <exclusions>
+                <!-- Declared by the SDK but never referenced by its classes; keep it out of the WAR. -->
+                <exclusion>
+                    <groupId>net.bytebuddy</groupId>
+                    <artifactId>byte-buddy</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>

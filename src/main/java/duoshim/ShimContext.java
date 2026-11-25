@@ -38,6 +38,7 @@ public final class ShimContext {
     private final ExpiringStore<IssuedCode> codes;
     private final ExpiringStore<IssuedToken> tokens;
     private final RateLimiter signPerIp;
+    private final RateLimiter signFailuresPerIp;
     private final RateLimiter signPerUser;
     private final RateLimiter grantPerIp;
     private final RateLimiter grantPerUser;
@@ -55,6 +56,7 @@ public final class ShimContext {
         this.tokens = new ExpiringStore<>("tokens", TOKEN_TTL, max, clock);
         Duration window = config.rateLimitWindow();
         this.signPerIp = new RateLimiter(config.rateLimitSignPerIp(), window, clock);
+        this.signFailuresPerIp = new RateLimiter(config.rateLimitSignFailuresPerIp(), window, clock);
         this.signPerUser = new RateLimiter(config.rateLimitPerUsername(), window, clock);
         this.grantPerIp = new RateLimiter(config.rateLimitGrantPerIp(), window, clock);
         this.grantPerUser = new RateLimiter(config.rateLimitPerUsername(), window, clock);
@@ -73,7 +75,7 @@ public final class ShimContext {
         for (ExpiringStore<?> s : List.of(handles, transactions, codes, tokens)) {
             s.sweep();
         }
-        for (RateLimiter r : List.of(signPerIp, signPerUser, grantPerIp, grantPerUser)) {
+        for (RateLimiter r : List.of(signPerIp, signFailuresPerIp, signPerUser, grantPerIp, grantPerUser)) {
             r.sweep();
         }
     }
@@ -88,6 +90,7 @@ public final class ShimContext {
     public ExpiringStore<IssuedCode> codes() { return codes; }
     public ExpiringStore<IssuedToken> tokens() { return tokens; }
     public RateLimiter signPerIp() { return signPerIp; }
+    public RateLimiter signFailuresPerIp() { return signFailuresPerIp; }
     public RateLimiter signPerUser() { return signPerUser; }
     public RateLimiter grantPerIp() { return grantPerIp; }
     public RateLimiter grantPerUser() { return grantPerUser; }

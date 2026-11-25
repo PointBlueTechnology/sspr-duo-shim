@@ -18,6 +18,13 @@ class AuditAndResponsesTest {
     }
 
     @Test
+    void auditNeutralisesUnicodeLineSeparators() {
+        List<String> lines = new ArrayList<>();
+        new Audit(lines::add).record("grant", "bob\u2028event=forged\u2029x\u0085y", "ok", "10.0.0.1");
+        assertEquals("event=grant user=\"bob_event=forged_x_y\" result=ok ip=10.0.0.1", lines.get(0));
+    }
+
+    @Test
     void auditPrintsDashForMissingValues() {
         List<String> lines = new ArrayList<>();
         new Audit(lines::add).record("sign", null, "invalid_client", null);

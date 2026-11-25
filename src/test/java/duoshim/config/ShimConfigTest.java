@@ -27,6 +27,7 @@ class ShimConfigTest {
         assertEquals(TestShim.SSPR_RETURN, c.ssprReturnUrl());
         assertTrue(c.cookieSecure());
         assertEquals(300, c.transactionTtl().toSeconds());
+        assertEquals(20, c.rateLimitSignFailuresPerIp());
     }
 
     @Test

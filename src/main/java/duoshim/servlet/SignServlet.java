@@ -37,15 +37,23 @@ public final class SignServlet extends ShimServlet {
         ShimContext ctx = ctx();
         String ip = ip(req);
 
+        // Authenticate first. Failed attempts are limited per IP in their own budget, which never
+        // affects requests that authenticate. So anonymous traffic can't use up the allowance of
+        // the SSPR server, even when a proxy or tunnel makes every caller share one address.
+        if (!ctx.clientAuthenticator().authenticate(req.getHeader("Authorization"),
+                req.getParameter("client_id"), req.getParameter("client_secret"))) {
+            if (!ctx.signFailuresPerIp().tryAcquire(ip)) {
+                ctx.audit().record(EVENT, null, "rate_limited_failures_ip", ip);
+                oauthError(resp, 429, "slow_down", "too many requests");
+                return;
+            }
+            ctx.audit().record(EVENT, null, "invalid_client", ip);
+            oauthError(resp, HttpServletResponse.SC_UNAUTHORIZED, "invalid_client", null);
+            return;
+        }
         if (!ctx.signPerIp().tryAcquire(ip)) {
             ctx.audit().record(EVENT, null, "rate_limited_ip", ip);
             oauthError(resp, 429, "slow_down", "too many requests");
-            return;
-        }
-        if (!ctx.clientAuthenticator().authenticate(req.getHeader("Authorization"),
-                req.getParameter("client_id"), req.getParameter("client_secret"))) {
-            ctx.audit().record(EVENT, null, "invalid_client", ip);
-            oauthError(resp, HttpServletResponse.SC_UNAUTHORIZED, "invalid_client", null);
             return;
         }
         String username = parseUsername(req.getParameter("data"));

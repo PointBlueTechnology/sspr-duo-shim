@@ -40,6 +40,14 @@ CH="${CH:-$CB}"
 [ -n "$TUSER" ] && id "$TUSER" >/dev/null 2>&1 || die "--tomcat-user must be an existing OS user"
 TGROUP="$(id -gn "$TUSER")"
 IS_ROOT=0; [ "$(id -u)" = 0 ] && IS_ROOT=1
+# The config path is written into setenv.sh, which Tomcat runs as shell: allow only a plain
+# absolute path (letters, digits, . _ - /), so it can never be interpreted as a command.
+case "$CONFIG" in
+  /*) ;;
+  *) die "--config must be an absolute path" ;;
+esac
+printf '%s' "$CONFIG" | grep -Eq '^/[A-Za-z0-9._/-]+$' || die "--config may contain only letters, digits, . _ - and /"
+case "$CONFIG" in *..*) die "--config must not contain '..'" ;; esac
 
 # 1a. Tomcat must be 9.x (javax.*). Tomcat 10+ needs a jakarta build of the shim.
 TC_VERSION="$(unzip -p "$CH/lib/catalina.jar" org/apache/catalina/util/ServerInfo.properties 2>/dev/null \

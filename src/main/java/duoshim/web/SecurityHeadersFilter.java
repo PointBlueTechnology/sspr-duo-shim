@@ -20,11 +20,16 @@ public final class SecurityHeadersFilter implements Filter {
         if (req.getCharacterEncoding() == null) {
             req.setCharacterEncoding("UTF-8");
         }
-        apply(resp, req.isSecure());
+        apply(resp);
         chain.doFilter(request, response);
     }
 
-    public static void apply(HttpServletResponse resp, boolean secure) {
+    /**
+     * HSTS is sent on every response. The shim's public URLs are always https (the config
+     * requires it), and browsers ignore HSTS received over plain HTTP. So this is correct even
+     * when TLS ends at a proxy or tunnel and Tomcat itself sees plain HTTP.
+     */
+    public static void apply(HttpServletResponse resp) {
         resp.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
         resp.setHeader("Pragma", "no-cache");
         resp.setDateHeader("Expires", 0);
@@ -33,8 +38,6 @@ public final class SecurityHeadersFilter implements Filter {
         resp.setHeader("Referrer-Policy", "no-referrer");
         resp.setHeader("Content-Security-Policy",
                 "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
-        if (secure) {
-            resp.setHeader("Strict-Transport-Security", "max-age=31536000");
-        }
+        resp.setHeader("Strict-Transport-Security", "max-age=31536000");
     }
 }

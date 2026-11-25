@@ -76,17 +76,27 @@ public final class GrantServlet extends ShimServlet {
             errorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "The request was not supported.", cancelUrl);
             return;
         }
-        Optional<SignedUser> signed = ctx.handles().consume(req.getParameter("parameters"));
-        if (signed.isEmpty()) {
+        // Look at the handle first and apply the per-user limit before using it up, so a user who
+        // is over the limit keeps a valid handle for when the window ends.
+        String handle = req.getParameter("parameters");
+        Optional<SignedUser> peeked = ctx.handles().peek(handle);
+        if (peeked.isEmpty()) {
             ctx.audit().record(EVENT, null, "invalid_or_expired_handle", ip);
             errorPage(resp, HttpServletResponse.SC_BAD_REQUEST,
                     "This verification link has expired or was already used. Start the password reset again.", cancelUrl);
             return;
         }
-        String username = signed.get().username();
+        String username = peeked.get().username();
         if (!ctx.grantPerUser().tryAcquire(userKey(username))) {
             ctx.audit().record(EVENT, username, "rate_limited_user", ip);
             errorPage(resp, 429, "Too many attempts. Wait a few minutes and try again.", cancelUrl);
+            return;
+        }
+        if (ctx.handles().consume(handle).isEmpty()) {
+            // Used by a concurrent request, or expired, between the look and the use.
+            ctx.audit().record(EVENT, null, "invalid_or_expired_handle", ip);
+            errorPage(resp, HttpServletResponse.SC_BAD_REQUEST,
+                    "This verification link has expired or was already used. Start the password reset again.", cancelUrl);
             return;
         }
 

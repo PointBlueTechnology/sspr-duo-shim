@@ -65,6 +65,15 @@ public final class RateLimiter {
         return allowed[0];
     }
 
+    /** True if the key has used up its window, without recording an attempt. */
+    public boolean isLimited(String key) {
+        if (limit <= 0) {
+            return false;
+        }
+        Window w = windows.get(Objects.requireNonNull(key));
+        return w != null && clock.millis() - w.startMillis() < windowMillis && w.count() >= limit;
+    }
+
     /** Drops windows that have ended. */
     public void sweep() {
         long now = clock.millis();

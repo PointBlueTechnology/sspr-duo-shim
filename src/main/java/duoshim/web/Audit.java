@@ -26,7 +26,10 @@ public final class Audit {
                 + " ip=" + clean(sourceIp));
     }
 
-    /** Neutralises control characters and quotes so a username cannot forge log lines. */
+    /**
+     * Neutralises control characters, Unicode line separators (U+0085, U+2028, U+2029), quotes
+     * and backslashes, so a username cannot forge or split log lines.
+     */
     static String clean(String value) {
         if (value == null) {
             return "-";
@@ -34,7 +37,8 @@ public final class Audit {
         StringBuilder sb = new StringBuilder(Math.min(value.length(), 256));
         for (int i = 0; i < value.length() && i < 256; i++) {
             char c = value.charAt(i);
-            sb.append(c < 0x20 || c == 0x7f || c == '"' || c == '\\' ? '_' : c);
+            boolean lineBreakOrControl = c < 0x20 || c == 0x7f || c == 0x85 || c == 0x2028 || c == 0x2029;
+            sb.append(lineBreakOrControl || c == '"' || c == '\\' ? '_' : c);
         }
         return sb.toString();
     }
