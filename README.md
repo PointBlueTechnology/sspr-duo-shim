@@ -16,6 +16,7 @@ SSPR's *External OAuth Authentication* verification method expects an OAuth serv
 - [SSPR compatibility](#sspr-compatibility)
 - [Security](SECURITY.md)
 - [License](#license)
+- [Changelog](CHANGELOG.md)
 
 ## How it works
 
