@@ -9,7 +9,6 @@ import duoshim.store.Secrets;
 import duoshim.store.StoreFullException;
 import duoshim.web.RedirectUris;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -42,7 +41,7 @@ public final class DuoCallbackServlet extends ShimServlet {
         String ip = ip(req);
         String returnUrl = ctx.config().ssprReturnUrl();
 
-        String txnId = readTxnCookie(req);
+        String txnId = GrantServlet.readTxnCookie(req);
         // The transaction is single use whatever happens next.
         GrantServlet.clearTxnCookie(resp, req.getContextPath(), ctx.config().cookieSecure());
         if (txnId == null) {
@@ -114,16 +113,4 @@ public final class DuoCallbackServlet extends ShimServlet {
         resp.sendRedirect(RedirectUris.withParams(txn.redirectUri(), params));
     }
 
-    static String readTxnCookie(HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
-        if (cookies == null) {
-            return null;
-        }
-        for (Cookie c : cookies) {
-            if (GrantServlet.TXN_COOKIE.equals(c.getName()) && c.getValue() != null && !c.getValue().isEmpty()) {
-                return c.getValue();
-            }
-        }
-        return null;
-    }
 }

@@ -130,7 +130,7 @@ The shim never returns an `id_token`. That keeps SSPR 4.8 out of its OIDC branch
 | Shim server | `duo.apiHost`:443 | Health check and code exchange. Duo's CAs are pinned, so no TLS interception. |
 | Browsers | Shim public URL, `duo.apiHost` | Prompt start, Universal Prompt, callback. |
 
-The host name in the **OAuth Login URL** and the host name in `duo.redirectUri` must be the **same**. The transaction cookie set at `/oauth/auth` is only sent back to that host's `/duoshim/duo` path.
+The host name in the **OAuth Login URL** and the host name in `duo.redirectUri` must be the **same**. The transaction cookie set at `/oauth/auth` is host-specific and limited to the `/duoshim` path.
 
 ## Clustering
 
@@ -165,6 +165,7 @@ Start with the shim's audit log (`event=… user="…" result=… ip=…`) and `
 | Audit `user_mismatch` | Duo normalised the username differently from what SSPR sent | Check Duo username normalisation; send the normalised form. |
 | Audit `state_mismatch` | Two Duo prompts in one browser (the newest cookie wins), or a tampered callback | Finish one reset at a time. |
 | Duo approves, then SSPR shows the username screen again. Audit has `duo_callback … result=allow` but no `token` line; SSPR log: `read state … match=false` / `response is not for a request issued during the current session` | The reset was started on a different host name (IP address, short name, old name) than SSPR's **Site URL**. SSPR sends the browser back to the Site URL host, where the browser has no SSPR session cookie. | Open SSPR only at the Site URL host, for example `https://sspr-test.pointbluetech.com:8443/sspr/public/forgottenpassword`. Optionally redirect other names to it at the proxy. |
+| After an unfinished attempt (Duo denied an unenrolled user, or the Duo window was closed), the shim shows *Your last Duo verification did not finish*; audit `repeat_choice` | Expected. SSPR keeps the forgotten-password attempt open and sends the user straight back to the shim. Duo's deny page never returns, so SSPR doesn't know the attempt ended. | *Start over* returns to SSPR's username page (SSPR's cancel path). *Try Duo again* opens a fresh Duo prompt. |
 | SSPR: *OAuth server did not respond with an username value for configured attribute* | `userinfo.attribute` ≠ SSPR's *OAuth User Name/DN Login Attribute* | Make them equal. |
 | SSPR: *oauth server username does not match previously identified user* | The injected value resolves, through SSPR's LDAP Username Search Filter, to a different DN than the one the search page found | Use an attribute the username search filter matches (for example `cn`). See also the DN-case fix in `SSPR-oauth/patch`. |
 | SSPR: token error 400; audit `invalid_grant` | Code older than 60 s, or the redirect URI SSPR sent differs | Check clock and load; check Site URL. |

@@ -9,11 +9,13 @@ import duoshim.store.Secrets;
 import duoshim.store.StoreFullException;
 import duoshim.web.RedirectUris;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
+import static duoshim.web.Responses.choicePage;
 import static duoshim.web.Responses.errorPage;
 
 /**
@@ -88,6 +90,15 @@ public final class GrantServlet extends ShimServlet {
             return;
         }
 
+        // A transaction cookie still present means this browser's previous Duo attempt never came
+        // back (Duo's deny page, for example an unenrolled user, ends at Duo, and SSPR then keeps
+        // sending the user straight back here). That attempt is void from now on.
+        String previousTxn = readTxnCookie(req);
+        boolean repeat = previousTxn != null;
+        if (repeat) {
+            ctx.transactions().consume(previousTxn);
+        }
+
         String duoState;
         String nonce = Secrets.newToken();
         String authUrl;
@@ -113,8 +124,31 @@ public final class GrantServlet extends ShimServlet {
             return;
         }
         setTxnCookie(resp, req.getContextPath(), txnId, (int) ctx.config().transactionTtl().toSeconds(), ctx.config().cookieSecure());
+        if (repeat) {
+            // Let the user choose instead of looping into Duo again. "Start over" is SSPR's own
+            // cancel path, which clears the forgotten-password state and shows the username page.
+            ctx.audit().record(EVENT, username, "repeat_choice", ip);
+            choicePage(resp, "Your last Duo verification did not finish",
+                    "Duo did not send you back after your previous attempt. This happens when Duo denies access "
+                            + "(for example, if you are not enrolled in Duo) or when the Duo window was closed.",
+                    "Try Duo again", authUrl, "Start over", cancelUrl);
+            return;
+        }
         ctx.audit().record(EVENT, username, "redirect_to_duo", ip);
         resp.sendRedirect(authUrl);
+    }
+
+    static String readTxnCookie(HttpServletRequest req) {
+        Cookie[] cookies = req.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie c : cookies) {
+            if (TXN_COOKIE.equals(c.getName()) && c.getValue() != null && !c.getValue().isEmpty()) {
+                return c.getValue();
+            }
+        }
+        return null;
     }
 
     /** Set-Cookie written by hand: javax.servlet.http.Cookie has no SameSite attribute. */
@@ -128,8 +162,11 @@ public final class GrantServlet extends ShimServlet {
                 + "; Max-Age=0; HttpOnly; SameSite=Lax" + (secure ? "; Secure" : ""));
     }
 
-    /** The cookie is only sent to the Duo callback, nowhere else. */
+    /**
+     * Scoped to the shim's context: the Duo callback needs it, and /oauth/auth reads it to spot a
+     * previous attempt that never returned. SSPR's own paths never see it.
+     */
     static String cookiePath(String contextPath) {
-        return (contextPath == null ? "" : contextPath) + "/duo";
+        return contextPath == null || contextPath.isEmpty() ? "/" : contextPath;
     }
 }

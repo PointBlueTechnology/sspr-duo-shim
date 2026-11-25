@@ -58,6 +58,6 @@ Global policy settings also apply unless the custom policy overrides them, so ch
 
 Then confirm the negative cases. Each must end at a shim error page, never at an SSPR password-change page:
 
-- A user who isn't enrolled in Duo (expect a deny, from the New User policy).
+- A user who isn't enrolled in Duo (expect a deny, from the New User policy). Duo's deny page doesn't send the browser back. If the user returns to SSPR's forgotten password page, the shim shows *Your last Duo verification did not finish*, with *Start over* and *Try Duo again*.
 - A Duo denial or timeout.
 - A user in Bypass status: expect it to **pass**. This is why Bypass must not be used.

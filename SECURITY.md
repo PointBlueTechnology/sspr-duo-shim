@@ -22,7 +22,7 @@ The shim's output is an assertion to SSPR: "Duo verified this user." SSPR acts o
 | Duo approval for user A used to finish user B's reset | The transaction stores the username. Duo's code exchange is bound to that username and a per-transaction nonce (verified by the SDK). The shim then checks again that Duo's `preferred_username` matches, ignoring case only. A unit test covers this case. |
 | Replay of handles, transactions, codes or tokens | Every one is single use: atomically removed from the store when read. Short lifetimes: handle 2 min, Duo transaction 5 min (configurable), code 60 s, token 60 s. |
 | Guessing handles, codes or tokens | 256 bits from `SecureRandom`. Stores are keyed by SHA-256 of the value, so lookups never compare the secret directly. Client secrets and Duo state are compared in constant time. |
-| Callback forged or played in another browser (login CSRF) | The callback requires the transaction cookie (`HttpOnly`, `Secure`, `SameSite=Lax`, path limited to `/duoshim/duo`) **and** the Duo state stored in that transaction. |
+| Callback forged or played in another browser (login CSRF) | The callback requires the transaction cookie (`HttpOnly`, `Secure`, `SameSite=Lax`, path limited to the shim's own context, `/duoshim`) **and** the Duo state stored in that transaction. |
 | Authorization code sent to an attacker | `redirect_uri` must equal `sspr.redirectUri` exactly. The token endpoint checks it again. Failures show an error page with a link back to SSPR and never redirect with a code. |
 | Code stolen in transit and redeemed | `/oauth/token` needs the SSPR client secret. |
 | Duo unreachable or misconfigured | Fails closed: no Duo health check means no prompt, and no `allow` means no code. There is no "fail open" mode. |
@@ -40,6 +40,7 @@ The shim's output is an assertion to SSPR: "Duo verified this user." SSPR acts o
 - **Single node.** State is in memory. There is no replication, and restarts drop in-flight transactions (fail closed). See README ▸ Clustering.
 - **Source IP behind proxies.** Rate limits use `getRemoteAddr()`. Without Tomcat's `RemoteIpValve`, every user appears as the proxy's IP, and the per-IP limit then applies to everyone together.
 - **One prompt per browser.** A second reset started in the same browser replaces the first one's cookie. The first then fails closed.
+- **Attempts that never return.** Duo's deny page (for example for an unenrolled user) ends at Duo, so SSPR never learns the attempt is over and keeps sending the user back. When `/oauth/auth` sees a transaction cookie from such an attempt, it voids that transaction and shows a page with *Try Duo again* or *Start over*. *Start over* is SSPR's own cancel path. Neither link carries a code.
 
 ## Reporting
 

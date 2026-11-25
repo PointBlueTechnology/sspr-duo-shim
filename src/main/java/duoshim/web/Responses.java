@@ -57,6 +57,22 @@ public final class Responses {
         w.write("</body></html>\n");
     }
 
+    /** Plain HTML page offering two links. Never carries an authorization code. */
+    public static void choicePage(HttpServletResponse resp, String heading, String message,
+                                  String primaryLabel, String primaryUrl,
+                                  String secondaryLabel, String secondaryUrl) throws IOException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType("text/html;charset=UTF-8");
+        PrintWriter w = resp.getWriter();
+        w.write("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
+                + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
+                + "<title>" + html(heading) + "</title></head><body>\n"
+                + "<h1>" + html(heading) + "</h1>\n<p>" + html(message) + "</p>\n"
+                + "<p><a href=\"" + html(primaryUrl) + "\">" + html(primaryLabel) + "</a></p>\n"
+                + "<p><a href=\"" + html(secondaryUrl) + "\">" + html(secondaryLabel) + "</a></p>\n"
+                + "</body></html>\n");
+    }
+
     static String html(String s) {
         StringBuilder sb = new StringBuilder(s.length() + 16);
         for (int i = 0; i < s.length(); i++) {

@@ -34,7 +34,7 @@ class GrantServletTest {
         assertEquals(List.of("bob"), flow.shim.duo.authUrlUsernames);
         assertNotNull(flow.shim.duo.nonceFor(s.duoState()), "a nonce is sent to Duo");
         String cookie = s.grantResponse().headerValues("Set-Cookie").get(0);
-        assertTrue(cookie.contains("; Path=/duoshim/duo;"));
+        assertTrue(cookie.contains("; Path=/duoshim;"), "scoped to the shim context only");
         assertTrue(cookie.contains("; HttpOnly"));
         assertTrue(cookie.contains("; SameSite=Lax"));
         assertTrue(cookie.contains("; Secure"));
