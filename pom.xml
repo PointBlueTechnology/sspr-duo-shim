@@ -10,6 +10,18 @@
     <packaging>war</packaging>
     <name>sspr-duo-shim</name>
     <description>OAuth shim between OpenText SSPR forgotten-password OAuth and the Duo Universal Prompt (Web SDK v4)</description>
+    <url>https://github.com/PointBlueTechnology/sspr-duo-shim</url>
+    <organization>
+        <name>PointBlue Technology</name>
+        <url>https://www.pointbluetech.com</url>
+    </organization>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
     <properties>
         <!-- Runs on Java 11+, the JVM SSPR 4.7/4.8 Tomcat ships with. Tests use newer syntax and
