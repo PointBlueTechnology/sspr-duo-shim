@@ -4,7 +4,7 @@ A small Java web application that lets OpenText (NetIQ) **SSPR 4.8 Forgotten Pas
 
 SSPR's *External OAuth Authentication* verification method expects an OAuth server with a non-standard `/sign` endpoint. Duo has none, and Duo SSO asks for the user's password first, which defeats the purpose of a password reset. The shim implements SSPR's OAuth dialect on one side and the Duo Web SDK on the other.
 
-- [How it works](#how-it-works)
+- [How it works](#how-it-works) (with sequence diagrams)
 - [Build](#build)
 - [Deploy on Tomcat next to SSPR](#deploy-on-tomcat-next-to-sspr)
 - [Duo setup](docs/DUO-SETUP.md) (separate page)
@@ -38,6 +38,13 @@ SSPR's *External OAuth Authentication* verification method expects an OAuth serv
  3. POST /oauth/token ───────────────────────────▶ consume code (60 s) → access token (60 s)
  4. POST /oauth/userinfo (Bearer) ───────────────▶ consume token → {"username":"jdoe"}
 ```
+
+Sequence diagrams (source: [docs/sequence.flow](docs/sequence.flow), rendered with the FlowDiagram `fdiag` CLI):
+
+- [Password reset verified by Duo](docs/sequence-reset_with_duo.svg)
+- [Duo attempt that never returns (deny, unenrolled, timeout) and *Start over*](docs/sequence-unfinished_attempt.svg)
+
+![Password reset verified by Duo](docs/sequence-reset_with_duo.svg)
 
 The username that comes back to SSPR is always the one SSPR registered in step 1, and Duo must have approved exactly that user. Nothing the browser sends can choose or change it. Every handle, transaction, code and token is 256-bit random, single use and short-lived.
 

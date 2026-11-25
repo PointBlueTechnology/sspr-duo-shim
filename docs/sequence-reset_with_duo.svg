@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1412" height="1883" viewBox="0 0 1412 1883">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M39.9 124.5 L39.9 1799.5" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<path d="M303.9 124.5 L303.9 1799.5" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<path d="M659.9 124.5 L659.9 1799.5" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<path d="M934.9 124.5 L934.9 1799.5" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<path d="M1216.45 124.5 L1216.45 1799.5" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<path d="M1344.95 124.5 L1344.95 1799.5" fill="none" stroke="#8a8a8a" stroke-width="1" stroke-linejoin="round" stroke-dasharray="5 4"/>
+<path d="M929.9 543.5 L939.9 543.5 L939.9 640.5 L929.9 640.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<path d="M654.9 253.5 L664.9 253.5 L664.9 711.5 L654.9 711.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<path d="M929.9 782.5 L939.9 782.5 L939.9 987.5 L929.9 987.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<path d="M929.9 1240.5 L939.9 1240.5 L939.9 1428.5 L929.9 1428.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<path d="M929.9 1536.5 L939.9 1536.5 L939.9 1573.5 L929.9 1573.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<path d="M929.9 1610.5 L939.9 1610.5 L939.9 1647.5 L929.9 1647.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<path d="M654.9 1499.5 L664.9 1499.5 L664.9 1775.5 L654.9 1775.5 Z" fill="#ffffff" stroke="#636363" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:1"><tspan x="171.9" y="191.91">open</tspan><tspan x="171.9" y="208.91">{base}/sspr/public/forgottenpassword</tspan></text>
+<path d="M39.9 216.5 L303.9 216.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:1"/>
+<path d="M303.9 216.5 L294.9 220.55 L294.9 212.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:2"><tspan x="481.9" y="245.91">GET /public/forgottenpassword</tspan></text>
+<path d="M303.9 253.5 L659.9 253.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:2"/>
+<path d="M659.9 253.5 L650.9 257.55 L650.9 249.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:3"><tspan x="479.4" y="282.91">search form</tspan></text>
+<path d="M654.9 290.5 L303.9 290.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:3"/>
+<path d="M303.9 290.5 L312.9 286.45 L312.9 294.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:4"><tspan x="171.9" y="319.91">enter username</tspan></text>
+<path d="M39.9 327.5 L303.9 327.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:4"/>
+<path d="M303.9 327.5 L294.9 331.55 L294.9 323.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:5"><tspan x="479.4" y="356.91">POST search form</tspan></text>
+<path d="M303.9 364.5 L654.9 364.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:5"/>
+<path d="M654.9 364.5 L645.9 368.55 L645.9 360.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="@search"><tspan x="1004.93" y="393.91">search for user</tspan></text>
+<path d="M664.9 401.5 L1344.95 401.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="@search"/>
+<path d="M1344.95 401.5 L1335.95 405.55 L1335.95 397.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:6"><tspan x="1004.93" y="430.91">user DN</tspan></text>
+<path d="M1344.95 438.5 L664.9 438.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:6"/>
+<path d="M664.9 438.5 L673.9 434.45 L673.9 442.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="@sign"><tspan x="799.9" y="501.91">POST /oauth/sign (Basic client auth)</tspan><tspan x="799.9" y="518.91">data=[{&quot;username&quot;:&quot;&lt;Inject User Name</tspan><tspan x="799.9" y="535.91">Value&gt;&quot;}]</tspan></text>
+<path d="M664.9 543.5 L934.9 543.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="@sign"/>
+<path d="M934.9 543.5 L925.9 547.55 L925.9 539.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:7"><tspan x="797.4" y="632.91">{&quot;data&quot;: &quot;&lt;handle&gt;&quot;}</tspan></text>
+<path d="M929.9 640.5 L664.9 640.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:7"/>
+<path d="M664.9 640.5 L673.9 636.45 L673.9 644.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:8"><tspan x="479.4" y="669.91">302</tspan><tspan x="479.4" y="686.91">/duoshim/oauth/auth?client_id&amp;redirect_uri</tspan><tspan x="479.4" y="703.91">&amp;response_type=code&amp;state&amp;parameters=&lt;handle&gt;</tspan></text>
+<path d="M654.9 711.5 L303.9 711.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:8"/>
+<path d="M303.9 711.5 L312.9 707.45 L312.9 715.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="@grant"><tspan x="619.4" y="774.91">GET /oauth/auth</tspan></text>
+<path d="M303.9 782.5 L934.9 782.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="@grant"/>
+<path d="M934.9 782.5 L925.9 786.55 L925.9 778.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:9"><tspan x="1078.18" y="871.91">health check (new client per request)</tspan></text>
+<path d="M939.9 879.5 L1216.45 879.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:9"/>
+<path d="M1216.45 879.5 L1207.45 883.55 L1207.45 875.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:10"><tspan x="1078.18" y="908.91">OK</tspan></text>
+<path d="M1216.45 916.5 L939.9 916.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:10"/>
+<path d="M939.9 916.5 L948.9 912.45 L948.9 920.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:11"><tspan x="616.9" y="945.91">302 Universal Prompt (username, state,</tspan><tspan x="616.9" y="962.91">nonce)</tspan><tspan x="616.9" y="979.91">Set-Cookie DUOSHIM_TXN (5 min)</tspan></text>
+<path d="M929.9 987.5 L303.9 987.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:11"/>
+<path d="M303.9 987.5 L312.9 983.45 L312.9 991.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:12"><tspan x="760.18" y="1016.91">Universal Prompt</tspan></text>
+<path d="M303.9 1024.5 L1216.45 1024.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:12"/>
+<path d="M1216.45 1024.5 L1207.45 1028.55 L1207.45 1020.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:13"><tspan x="628.17" y="1053.91">push / second factor</tspan></text>
+<path d="M1216.45 1061.5 L39.9 1061.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:13"/>
+<path d="M39.9 1061.5 L48.9 1057.45 L48.9 1065.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:14"><tspan x="628.17" y="1090.91">approve</tspan></text>
+<path d="M39.9 1098.5 L1216.45 1098.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:14"/>
+<path d="M1216.45 1098.5 L1207.45 1102.55 L1207.45 1094.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:15"><tspan x="760.18" y="1161.91">302</tspan><tspan x="760.18" y="1178.91">/duoshim/duo/callback?state&amp;duo_code</tspan></text>
+<path d="M1216.45 1186.5 L303.9 1186.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:15"/>
+<path d="M303.9 1186.5 L312.9 1182.45 L312.9 1190.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="@callback"><tspan x="619.4" y="1215.91">GET /duo/callback (+ DUOSHIM_TXN</tspan><tspan x="619.4" y="1232.91">cookie)</tspan></text>
+<path d="M303.9 1240.5 L934.9 1240.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="@callback"/>
+<path d="M934.9 1240.5 L925.9 1244.55 L925.9 1236.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:16"><tspan x="1078.18" y="1269.91">exchange duo_code (username, nonce)</tspan></text>
+<path d="M939.9 1277.5 L1216.45 1277.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:16"/>
+<path d="M1216.45 1277.5 L1207.45 1281.55 L1207.45 1273.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:17"><tspan x="1078.18" y="1306.91">signed ID token: auth_result=allow,</tspan><tspan x="1078.18" y="1323.91">preferred_username</tspan></text>
+<path d="M1216.45 1331.5 L939.9 1331.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:17"/>
+<path d="M939.9 1331.5 L948.9 1327.45 L948.9 1335.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:18"><tspan x="616.9" y="1420.91">302 /sspr/public/oauth?code&amp;state</tspan></text>
+<path d="M929.9 1428.5 L303.9 1428.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:18"/>
+<path d="M303.9 1428.5 L312.9 1424.45 L312.9 1432.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:19"><tspan x="481.9" y="1491.91">GET /public/oauth?code&amp;state</tspan></text>
+<path d="M303.9 1499.5 L659.9 1499.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:19"/>
+<path d="M659.9 1499.5 L650.9 1503.55 L650.9 1495.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="@token"><tspan x="799.9" y="1528.91">POST /oauth/token (client auth)</tspan></text>
+<path d="M664.9 1536.5 L934.9 1536.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="@token"/>
+<path d="M934.9 1536.5 L925.9 1540.55 L925.9 1532.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:20"><tspan x="797.4" y="1565.91">access_token (60 s, no id_token)</tspan></text>
+<path d="M929.9 1573.5 L664.9 1573.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:20"/>
+<path d="M664.9 1573.5 L673.9 1569.45 L673.9 1577.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="@userinfo"><tspan x="799.9" y="1602.91">POST /oauth/userinfo (Bearer)</tspan></text>
+<path d="M664.9 1610.5 L934.9 1610.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="@userinfo"/>
+<path d="M934.9 1610.5 L925.9 1614.55 L925.9 1606.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:21"><tspan x="797.4" y="1639.91">{&quot;username&quot;: &quot;&lt;verified user&gt;&quot;}</tspan></text>
+<path d="M929.9 1647.5 L664.9 1647.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:21"/>
+<path d="M664.9 1647.5 L673.9 1643.45 L673.9 1651.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:22"><tspan x="1004.93" y="1676.91">resolve username, compare DN with</tspan><tspan x="1004.93" y="1693.91">searched user</tspan></text>
+<path d="M664.9 1701.5 L1344.95 1701.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" data-tag="message:22"/>
+<path d="M1344.95 1701.5 L1335.95 1705.55 L1335.95 1697.45 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:23"><tspan x="1004.93" y="1730.91">same DN</tspan></text>
+<path d="M1344.95 1738.5 L664.9 1738.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:23"/>
+<path d="M664.9 1738.5 L673.9 1734.45 L673.9 1742.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="message:24"><tspan x="479.4" y="1767.91">verification satisfied: set new password</tspan></text>
+<path d="M654.9 1775.5 L303.9 1775.5" fill="none" stroke="#6e6e6e" stroke-width="1.2" stroke-linejoin="round" stroke-dasharray="6 4" data-tag="message:24"/>
+<path d="M303.9 1775.5 L312.9 1771.45 L312.9 1779.55 Z" fill="#3a3a3a" stroke="#3a3a3a" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M944.9 561.5 L1147.9 561.5 L1155.9 569.5 L1155.9 607.5 L944.9 607.5 Z" fill="#ffe2c6" stroke="#b08a68" stroke-width="1" stroke-linejoin="round" data-tag="note:1"/>
+<path d="M1147.9 561.5 L1147.9 569.5 L1155.9 569.5" fill="none" stroke="#b08a68" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" text-anchor="start" fill="#000000" data-tag="note:1"><tspan x="956.9" y="581.22">store username under a 256-bit</tspan><tspan x="956.9" y="597.22">single-use handle (2 min)</tspan></text>
+<path d="M944.9 800.5 L1184.9 800.5 L1192.9 808.5 L1192.9 846.5 L944.9 846.5 Z" fill="#ffe2c6" stroke="#b08a68" stroke-width="1" stroke-linejoin="round" data-tag="note:2"/>
+<path d="M1184.9 800.5 L1184.9 808.5 L1192.9 808.5" fill="none" stroke="#b08a68" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" text-anchor="start" fill="#000000" data-tag="note:2"><tspan x="956.9" y="820.22">check client_id and exact redirect_uri,</tspan><tspan x="956.9" y="836.22">consume handle -&gt; username</tspan></text>
+<path d="M944.9 1349.5 L1174.9 1349.5 L1182.9 1357.5 L1182.9 1395.5 L944.9 1395.5 Z" fill="#ffe2c6" stroke="#b08a68" stroke-width="1" stroke-linejoin="round" data-tag="note:3"/>
+<path d="M1174.9 1349.5 L1174.9 1357.5 L1182.9 1357.5" fill="none" stroke="#b08a68" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12.5" text-anchor="start" fill="#000000" data-tag="note:3"><tspan x="956.9" y="1369.22">require ALLOW and same username;</tspan><tspan x="956.9" y="1385.22">mint single-use code (60 s)</tspan></text>
+<path d="M44.38 69.98 C44.38 72.45 42.37 74.46 39.9 74.46 C37.43 74.46 35.42 72.45 35.42 69.98 C35.42 67.51 37.43 65.5 39.9 65.5 C42.37 65.5 44.38 67.51 44.38 69.98 Z M39.9 74.46 L39.9 87.82 M25.5 78.47 L54.3 78.47 M39.9 87.82 L28.38 101.5 M39.9 87.82 L51.42 101.5" fill="none" stroke="#979797" stroke-width="1.5" stroke-linejoin="round" data-tag="participant:user"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:user"><tspan x="39.9" y="120.91">User</tspan></text>
+<path d="M267.9 89.5 L339.9 89.5 C342.11 89.5 343.9 91.29 343.9 93.5 L343.9 120.5 C343.9 122.71 342.11 124.5 339.9 124.5 L267.9 124.5 C265.69 124.5 263.9 122.71 263.9 120.5 L263.9 93.5 C263.9 91.29 265.69 89.5 267.9 89.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:browser"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:browser"><tspan x="303.9" y="111.91">Browser</tspan></text>
+<path d="M599.9 89.5 L719.9 89.5 C722.11 89.5 723.9 91.29 723.9 93.5 L723.9 120.5 C723.9 122.71 722.11 124.5 719.9 124.5 L599.9 124.5 C597.69 124.5 595.9 122.71 595.9 120.5 L595.9 93.5 C595.9 91.29 597.69 89.5 599.9 89.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:sspr"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:sspr"><tspan x="659.9" y="111.91">SSPR 4.8 (/sspr)</tspan></text>
+<path d="M845.4 89.5 L1024.4 89.5 C1026.61 89.5 1028.4 91.29 1028.4 93.5 L1028.4 120.5 C1028.4 122.71 1026.61 124.5 1024.4 124.5 L845.4 124.5 C843.19 124.5 841.4 122.71 841.4 120.5 L841.4 93.5 C841.4 91.29 843.19 89.5 845.4 89.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:shim"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:shim"><tspan x="934.9" y="111.91">sspr-duo-shim (/duoshim)</tspan></text>
+<path d="M1161.95 89.5 L1270.95 89.5 C1273.16 89.5 1274.95 91.29 1274.95 93.5 L1274.95 120.5 C1274.95 122.71 1273.16 124.5 1270.95 124.5 L1161.95 124.5 C1159.74 124.5 1157.95 122.71 1157.95 120.5 L1157.95 93.5 C1157.95 91.29 1159.74 89.5 1161.95 89.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:duo"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:duo"><tspan x="1216.45" y="111.91">Duo (API host)</tspan></text>
+<path d="M1302.95 82 C1302.95 77.31 1321.75 73.5 1344.95 73.5 C1368.15 73.5 1386.95 77.31 1386.95 82 L1386.95 116 C1386.95 120.69 1368.15 124.5 1344.95 124.5 C1321.75 124.5 1302.95 120.69 1302.95 116 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:ldap"/>
+<path d="M1302.95 82 C1302.95 86.69 1321.75 90.5 1344.95 90.5 C1368.15 90.5 1386.95 86.69 1386.95 82" fill="none" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:ldap"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:ldap"><tspan x="1344.95" y="108.91">Directory</tspan></text>
+<path d="M44.38 1803.98 C44.38 1806.45 42.37 1808.46 39.9 1808.46 C37.43 1808.46 35.42 1806.45 35.42 1803.98 C35.42 1801.51 37.43 1799.5 39.9 1799.5 C42.37 1799.5 44.38 1801.51 44.38 1803.98 Z M39.9 1808.46 L39.9 1821.82 M25.5 1812.47 L54.3 1812.47 M39.9 1821.82 L28.38 1835.5 M39.9 1821.82 L51.42 1835.5" fill="none" stroke="#979797" stroke-width="1.5" stroke-linejoin="round" data-tag="participant:user"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:user"><tspan x="39.9" y="1854.91">User</tspan></text>
+<path d="M267.9 1799.5 L339.9 1799.5 C342.11 1799.5 343.9 1801.29 343.9 1803.5 L343.9 1830.5 C343.9 1832.71 342.11 1834.5 339.9 1834.5 L267.9 1834.5 C265.69 1834.5 263.9 1832.71 263.9 1830.5 L263.9 1803.5 C263.9 1801.29 265.69 1799.5 267.9 1799.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:browser"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:browser"><tspan x="303.9" y="1821.91">Browser</tspan></text>
+<path d="M599.9 1799.5 L719.9 1799.5 C722.11 1799.5 723.9 1801.29 723.9 1803.5 L723.9 1830.5 C723.9 1832.71 722.11 1834.5 719.9 1834.5 L599.9 1834.5 C597.69 1834.5 595.9 1832.71 595.9 1830.5 L595.9 1803.5 C595.9 1801.29 597.69 1799.5 599.9 1799.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:sspr"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:sspr"><tspan x="659.9" y="1821.91">SSPR 4.8 (/sspr)</tspan></text>
+<path d="M845.4 1799.5 L1024.4 1799.5 C1026.61 1799.5 1028.4 1801.29 1028.4 1803.5 L1028.4 1830.5 C1028.4 1832.71 1026.61 1834.5 1024.4 1834.5 L845.4 1834.5 C843.19 1834.5 841.4 1832.71 841.4 1830.5 L841.4 1803.5 C841.4 1801.29 843.19 1799.5 845.4 1799.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:shim"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:shim"><tspan x="934.9" y="1821.91">sspr-duo-shim (/duoshim)</tspan></text>
+<path d="M1161.95 1799.5 L1270.95 1799.5 C1273.16 1799.5 1274.95 1801.29 1274.95 1803.5 L1274.95 1830.5 C1274.95 1832.71 1273.16 1834.5 1270.95 1834.5 L1161.95 1834.5 C1159.74 1834.5 1157.95 1832.71 1157.95 1830.5 L1157.95 1803.5 C1157.95 1801.29 1159.74 1799.5 1161.95 1799.5 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:duo"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:duo"><tspan x="1216.45" y="1821.91">Duo (API host)</tspan></text>
+<path d="M1302.95 1808 C1302.95 1803.31 1321.75 1799.5 1344.95 1799.5 C1368.15 1799.5 1386.95 1803.31 1386.95 1808 L1386.95 1842 C1386.95 1846.69 1368.15 1850.5 1344.95 1850.5 C1321.75 1850.5 1302.95 1846.69 1302.95 1842 Z" fill="#e4e4e4" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:ldap"/>
+<path d="M1302.95 1808 C1302.95 1812.69 1321.75 1816.5 1344.95 1816.5 C1368.15 1816.5 1386.95 1812.69 1386.95 1808" fill="none" stroke="#979797" stroke-width="1" stroke-linejoin="round" data-tag="participant:ldap"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13" text-anchor="middle" fill="#000000" data-tag="participant:ldap"><tspan x="1344.95" y="1834.91">Directory</tspan></text>
+<path d="M24 155 L1387.95 155" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M24 158 L1387.95 158" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M622.97 145 L788.97 145 L788.97 168 L622.97 168 Z" fill="#ffffff" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#000000" font-weight="bold"><tspan x="705.97" y="161.04">SSPR identifies the user</tspan></text>
+<path d="M24 465 L1387.95 465" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M24 468 L1387.95 468" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M582.47 455 L829.47 455 L829.47 478 L582.47 478 Z" fill="#ffffff" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#000000" font-weight="bold"><tspan x="705.97" y="471.04">SSPR registers the user with the shim</tspan></text>
+<path d="M24 738 L1387.95 738" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M24 741 L1387.95 741" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M612.47 728 L799.47 728 L799.47 751 L612.47 751 Z" fill="#ffffff" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#000000" font-weight="bold"><tspan x="705.97" y="744.04">Shim starts the Duo prompt</tspan></text>
+<path d="M24 1125 L1387.95 1125" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M24 1128 L1387.95 1128" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M582.47 1115 L829.47 1115 L829.47 1138 L582.47 1138 Z" fill="#ffffff" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#000000" font-weight="bold"><tspan x="705.97" y="1131.04">Duo returns; shim hands SSPR a code</tspan></text>
+<path d="M24 1455 L1387.95 1455" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M24 1458 L1387.95 1458" fill="none" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<path d="M623.97 1445 L787.97 1445 L787.97 1468 L623.97 1468 Z" fill="#ffffff" stroke="#000000" stroke-width="1" stroke-linejoin="round"/>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" text-anchor="middle" fill="#000000" font-weight="bold"><tspan x="705.97" y="1461.04">SSPR redeems the code</tspan></text>
+<text font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="17" text-anchor="middle" fill="#000000" font-weight="bold" data-tag="title"><tspan x="705.98" y="41.42">Password reset verified by Duo</tspan></text>
+</svg>
