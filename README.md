@@ -6,7 +6,7 @@ SSPR's *External OAuth Authentication* verification method expects an OAuth serv
 
 - [How it works](#how-it-works) (with sequence diagrams)
 - [Build](#build)
-- [Deploy on Tomcat next to SSPR](#deploy-on-tomcat-next-to-sspr)
+- [Deploy](#deploy) ([options: SSPR's Tomcat or its own](#deployment-options))
 - [Duo setup](docs/DUO-SETUP.md) (separate page)
 - [SSPR Forgotten Password settings](#sspr-forgotten-password-settings)
 - [Network requirements](#network-requirements)
@@ -74,7 +74,31 @@ The WAR itself runs on **Java 11 or newer**: the shim is compiled with `--releas
 
 Runtime dependencies are the Duo Universal SDK 1.4.0 and what it brings in (Retrofit, OkHttp, Jackson, java-jwt). There is no web framework.
 
-## Deploy on Tomcat next to SSPR
+## Deploy
+
+### Deployment options
+
+The shim is an ordinary webapp. It can share SSPR's Tomcat or run in a Tomcat of its own.
+
+| | Inside SSPR's Tomcat | In its own Tomcat |
+|---|---|---|
+| Where | `duoshim.war` next to `sspr.war` in SSPR's `webapps/` (as tested on SSPR 4.8.0.600) | A separate Tomcat 9 on the same host (another port), or on its own host |
+| Public URL | Same host and port as SSPR, for example `https://sspr.example.com/duoshim/...` | Its own, for example `https://sspr.example.com:8445/duoshim/...` or `https://duoshim.example.com/duoshim/...` |
+| Restarts and upgrades | Together with SSPR (restarting Tomcat restarts both) | Independent of SSPR |
+| Java | SSPR's JVM (Java 11+) | Any Java 11+ |
+| Fits | Simplest setup, one process to run | Separate maintenance windows; active/standby on two small hosts |
+
+**Running it in its own Tomcat:**
+- **Tomcat 9** (`javax.servlet` 4.0). Tomcat 10.1 and later can run `javax` webapps placed in their `webapps-javaee` folder by converting them to `jakarta` at deploy time. That should work for the shim, but it is **untested**.
+- **Install** with the same script, pointed at that Tomcat: `install-duoshim.sh --catalina-base <its CATALINA_BASE> --tomcat-user <its OS user>`.
+- **Point SSPR's OAuth settings at the shim's URL:** Login URL `{shim}/duoshim/oauth/auth`, Code Resolve Service URL `{shim}/duoshim/oauth/token`, Profile Service URL `{shim}/duoshim/oauth/userinfo`. Set `duo.redirectUri` to `{shim}/duoshim/duo/callback`, where `{shim}` is the shim's public `https://host[:port]`.
+- **SSPR's server must reach that URL** over HTTPS, and trust its certificate. Import it in the Forgotten Password profile's *OAuth Web Service Server Certificate*.
+- **SSPR can be on a different host name**, or even a different domain. See [Network requirements](#network-requirements) for the one host-name rule that does apply.
+- **Deploying as `ROOT.war`** on a host dedicated to the shim drops the `/duoshim` prefix: for example `https://duoshim.example.com/oauth/auth` and `https://duoshim.example.com/duo/callback`. Use those paths in SSPR and in `duo.redirectUri`.
+
+The steps below apply to either option. "Tomcat" means whichever Tomcat runs the shim.
+
+### Steps
 
 1. **Configuration file.** Copy `duoshim.properties.example` to a path outside the WAR, for example `/etc/duoshim/duoshim.properties`, fill it in, and restrict it:
    ```bash
@@ -85,7 +109,7 @@ Runtime dependencies are the Duo Universal SDK 1.4.0 and what it brings in (Retr
    CATALINA_OPTS="$CATALINA_OPTS -Dduoshim.config=/etc/duoshim/duoshim.properties"
    ```
    Alternatively, set the environment variable `DUOSHIM_CONFIG`.
-3. **Deploy** `duoshim.war` into the same `webapps/` directory as `sspr.war`. The context path becomes `/duoshim`, matching the URLs below.
+3. **Deploy** `duoshim.war` into that Tomcat's `webapps/` directory (SSPR's, or the shim's own). Keep the file name: the context path becomes `/duoshim`, matching the URLs below.
 4. **Audit log (recommended).** Audit lines go to the java.util.logging logger `duoshim.audit`. To write them to their own file, add this to `conf/logging.properties`:
    ```properties
    handlers = 1catalina.org.apache.juli.AsyncFileHandler, ..., 9duoshim.org.apache.juli.AsyncFileHandler
@@ -172,11 +196,11 @@ The shim never returns an `id_token`. That keeps SSPR 4.8 out of its OIDC branch
 
 | From | To | Why |
 |---|---|---|
-| SSPR server | Shim's **public** URL (`{base}/duoshim/...`), HTTPS | `/sign`, `/token`, `/userinfo` are server-to-server calls to the URLs configured in SSPR. When SSPR and the shim share a server, that server must be able to reach its **own public host name** (DNS and NAT hairpin, or a hosts-file entry pointing it at itself). |
+| SSPR server | Shim's **public** URL (`{base}/duoshim/...`), HTTPS | `/sign`, `/token`, `/userinfo` are server-to-server calls to the URLs configured in SSPR. When SSPR and the shim share a server, that server must be able to reach its **own public host name** (DNS and NAT hairpin, or a hosts-file entry pointing it at itself). When the shim runs elsewhere, SSPR's server needs a route to the shim's host and port. |
 | Shim server | `duo.apiHost`:443 | Health check and code exchange. Duo's CAs are pinned, so no TLS interception. |
 | Browsers | Shim public URL, `duo.apiHost` | Prompt start, Universal Prompt, callback. |
 
-The host name in the **OAuth Login URL** and the host name in `duo.redirectUri` must be the **same**. The transaction cookie set at `/oauth/auth` is host-specific and limited to the `/duoshim` path.
+The host name in the **OAuth Login URL** and the host name in `duo.redirectUri` must be the **same**. Both are the shim's own URLs: the transaction cookie set at `/oauth/auth` is host-specific, limited to the shim's path, and must come back on `/duo/callback`. SSPR's own host name (its Site URL) does **not** have to match. The shim can live on a different host, or even a different domain, because the hops from SSPR to the shim, to Duo, and back are all normal top-level navigations, which carry `SameSite=Lax` cookies.
 
 ## Clustering
 
@@ -190,14 +214,14 @@ The host name in the **OAuth Login URL** and the host name in `duo.redirectUri` 
 
 Run two shim instances with **exactly one receiving traffic at a time**. A load balancer, or a floating IP, switches to the standby when the active one fails its health check.
 
-**Layout.** Serve SSPR and the shim under **one public host name**: the shim's transaction cookie is per host, and SSPR's Site URL, the OAuth Login URL and `duo.redirectUri` must share that host. Route by path:
+**Layout.** The simplest layout puts SSPR and the shim under **one public host name** on one load balancer and routes by path. (Only the shim's own two URLs, the OAuth Login URL and `duo.redirectUri`, must share a host name. See [Network requirements](#network-requirements). A separate host name for the shim, such as `duoshim.example.com`, with its own active/standby backend, works the same way.)
 
 | Path | Backend | Balancing |
 |---|---|---|
 | `/sspr/*` | All SSPR nodes | Sticky sessions (SSPR keeps forgotten-password progress in its HTTP session) |
 | `/duoshim/*` | Shim A (active), shim B (backup) | **One server at a time**, never round robin |
 
-The shim can be a second webapp in each SSPR node's Tomcat (as on the lab host), with only one copy receiving `/duoshim` traffic. Or it can run on separate hosts. SSPR's server-to-server calls (`/sign`, `/token`, `/userinfo`) use the same public URL, so they also go through the load balancer to the active shim. Each SSPR node must be able to reach that public URL.
+The shim can be a second webapp in each SSPR node's Tomcat (as on the lab host), with only one copy receiving `/duoshim` traffic. Or it can run in its own Tomcat on separate hosts (see [Deployment options](#deployment-options)). SSPR's server-to-server calls (`/sign`, `/token`, `/userinfo`) use the same public URL, so they also go through the load balancer to the active shim. Each SSPR node must be able to reach that public URL.
 
 **Health check.**
 - `GET /duoshim/health` returns 200 `{"status":"ok"}` when the shim has started. If its configuration is invalid the webapp never starts, and Tomcat returns 404.
