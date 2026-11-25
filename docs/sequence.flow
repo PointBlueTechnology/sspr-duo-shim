@@ -1,0 +1,94 @@
+flowdiagram 1
+
+# sspr-duo-shim: how SSPR forgotten password uses Duo through the shim.
+# Paths are relative to {base} = the public https://host:port shared by SSPR and the shim.
+
+sequence reset_with_duo "Password reset verified by Duo" { owner: sspr-duo-shim }
+    participant user "User" { type: actor }
+    participant browser "Browser"
+    participant sspr "SSPR 4.8 (/sspr)"
+    participant shim "sspr-duo-shim (/duoshim)"
+    participant duo "Duo (API host)"
+    participant ldap "Directory" { type: database }
+
+    == SSPR identifies the user ==
+    user -> browser: open {base}/sspr/public/forgottenpassword
+    browser -> +sspr: GET /public/forgottenpassword
+    sspr --> browser: search form
+    user -> browser: enter username
+    browser -> sspr: POST search form
+    sspr -> ldap: search for user @search
+    ldap --> sspr: user DN
+
+    == SSPR registers the user with the shim ==
+    sspr -> +shim: POST /oauth/sign (Basic client auth)\ndata=[{"username":"<Inject User Name Value>"}] @sign
+    note right of shim: store username under a 256-bit\nsingle-use handle (2 min)
+    shim --> -sspr: {"data": "<handle>"}
+    sspr --> -browser: 302 /duoshim/oauth/auth?client_id&redirect_uri\n&response_type=code&state&parameters=<handle>
+
+    == Shim starts the Duo prompt ==
+    browser -> +shim: GET /oauth/auth @grant
+    note right of shim: check client_id and exact redirect_uri,\nconsume handle -> username
+    shim -> duo: health check (new client per request)
+    duo --> shim: OK
+    shim --> -browser: 302 Universal Prompt (username, state, nonce)\nSet-Cookie DUOSHIM_TXN (5 min)
+    browser -> duo: Universal Prompt
+    duo -> user: push / second factor
+    user -> duo: approve
+
+    == Duo returns; shim hands SSPR a code ==
+    duo --> browser: 302 /duoshim/duo/callback?state&duo_code
+    browser -> +shim: GET /duo/callback (+ DUOSHIM_TXN cookie) @callback
+    shim -> duo: exchange duo_code (username, nonce)
+    duo --> shim: signed ID token: auth_result=allow,\npreferred_username
+    note right of shim: require ALLOW and same username;\nmint single-use code (60 s)
+    shim --> -browser: 302 /sspr/public/oauth?code&state
+
+    == SSPR redeems the code ==
+    browser -> +sspr: GET /public/oauth?code&state
+    sspr -> +shim: POST /oauth/token (client auth) @token
+    shim --> -sspr: access_token (60 s, no id_token)
+    sspr -> +shim: POST /oauth/userinfo (Bearer) @userinfo
+    shim --> -sspr: {"username": "<verified user>"}
+    sspr -> ldap: resolve username, compare DN with searched user
+    ldap --> sspr: same DN
+    sspr --> -browser: verification satisfied: set new password
+
+sequence unfinished_attempt "Duo attempt that never returns (deny, unenrolled, timeout)" { owner: sspr-duo-shim }
+    participant user "User" { type: actor }
+    participant browser "Browser"
+    participant sspr "SSPR 4.8 (/sspr)"
+    participant shim "sspr-duo-shim (/duoshim)"
+    participant duo "Duo (API host)"
+
+    browser -> shim: GET /oauth/auth (first attempt)
+    shim --> browser: 302 Universal Prompt\nSet-Cookie DUOSHIM_TXN
+    browser -> duo: Universal Prompt
+    alt user not enrolled (New User policy: Deny) @unenrolled
+        duo --> browser: Duo deny page
+    else push denied
+        duo --> browser: Duo "denied" page
+    else push timed out
+        duo --> browser: Duo timeout page
+    end
+    note over browser, duo: Duo never calls /duo/callback:\nno code, no identity for SSPR
+
+    == User goes back to SSPR ==
+    user -> browser: open forgotten password again
+    browser -> sspr: GET /public/forgottenpassword
+    note right of sspr: OAuth method still in progress\nin SSPR's session
+    sspr -> shim: POST /oauth/sign
+    shim --> sspr: handle
+    sspr --> browser: 302 /duoshim/oauth/auth
+    browser -> +shim: GET /oauth/auth (+ old DUOSHIM_TXN cookie) @repeat
+    note right of shim: old attempt voided;\nnew transaction + cookie
+    shim --> -browser: "Your last Duo verification did not finish"\n[Try Duo again] [Start over]
+    alt Start over @startover
+        browser -> +shim: GET /oauth/startover?t=<from cookie>
+        note right of shim: void attempt, clear cookie
+        shim --> -browser: 302 /sspr/public/oauth?error=access_denied\n&sub_error=usrcan&state
+        browser -> +sspr: GET /public/oauth (user cancelled)
+        sspr --> -browser: OAuth attempt cancelled: username page
+    else Try Duo again
+        browser -> duo: Universal Prompt (new attempt)
+    end
