@@ -72,13 +72,33 @@ class DuoCallbackServletTest {
     }
 
     @Test
-    void duoStateMismatchIsRejectedAndBurnsTheTransaction() throws Exception {
+    void duoStateMismatchIsRejectedButKeepsTheTransaction() throws Exception {
         Flow.Started s = flow.start("bob", "s");
         String duoCode = flow.shim.duo.completePrompt("bob");
-        assertRejected(flow.callback(Flow.callbackRequest(s.txnCookie(), "duo-state-wrong-0000000000", duoCode)), 400);
+        Resp forged = flow.callback(Flow.callbackRequest(s.txnCookie(), "duo-state-wrong-0000000000", duoCode));
+        assertMismatchRejected(forged);
+        assertEquals(1, flow.shim.ctx.transactions().size(), "a wrong state does not use up the attempt");
+        Resp real = flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(), duoCode));
+        assertEquals(302, real.status, "the genuine Duo return still completes");
+    }
+
+    /** Another site navigating the browser to the callback mid-prompt must not cancel the attempt (M1). */
+    @Test
+    void forgedCallbackWithErrorDoesNotCancelThePendingAttempt() throws Exception {
+        Flow.Started s = flow.start("bob", "s");
+        assertMismatchRejected(flow.callback(Flow.callbackRequest(s.txnCookie(), "x", null).param("error", "access_denied")));
+        assertMismatchRejected(flow.callback(Flow.callbackRequest(s.txnCookie(), null, null)));
+        Resp real = flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(), flow.shim.duo.completePrompt("bob")));
+        assertEquals(302, real.status);
+    }
+
+    /** Wrong state: error page, nothing minted, and the cookie is left alone. */
+    private void assertMismatchRejected(Resp r) {
+        assertEquals(400, r.status, r.body());
+        assertNull(r.redirect);
+        assertEquals(0, flow.shim.ctx.codes().size());
+        assertTrue(r.headerValues("Set-Cookie").isEmpty(), "cookie kept so the real return still works");
         assertTrue(flow.shim.audited("duo_callback", "state_mismatch"));
-        assertEquals(400, flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(), duoCode)).status,
-                "no second try with the same transaction");
     }
 
     @Test
@@ -139,25 +159,22 @@ class DuoCallbackServletTest {
         Flow.Started bob = flow.start("bob", "bob-state");
         // Bob's browser cookie with Alice's Duo state and Alice's approval.
         Resp r = flow.callback(Flow.callbackRequest(bob.txnCookie(), alice.duoState(), flow.shim.duo.completePrompt("alice")));
-        assertRejected(r, 400);
-        assertTrue(flow.shim.audited("duo_callback", "state_mismatch"));
+        assertMismatchRejected(r);
+    }
+
+    /** Same rule as the Duo SDK: preferred_username must equal the username exactly, case included. */
+    @Test
+    void usernameMustMatchExactly() throws Exception {
+        Flow.Started s = flow.start("Bob", "s");
+        assertRejected(flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(),
+                flow.shim.duo.completePrompt("bob"))), 403);
+        assertTrue(flow.shim.audited("duo_callback", "user_mismatch"));
     }
 
     @Test
-    void usernameComparisonIgnoresCaseOnly() throws Exception {
+    void codeCarriesTheTransactionUsername() throws Exception {
         Flow.Started s = flow.start("Bob", "s");
-        Resp r = flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(), flow.shim.duo.completePrompt("bob")));
-        assertEquals(302, r.status, "Duo usernames are case-insensitive");
-        flow.shim.ctx.codes().consume(Flow.query(r.redirect).get("code"));
-        Flow.Started t = flow.start("bob", "s");
-        assertRejected(flow.callback(Flow.callbackRequest(t.txnCookie(), t.duoState(),
-                flow.shim.duo.completePrompt("bob2"))), 403);
-    }
-
-    @Test
-    void codeIsBoundToTransactionUserNotDuoSpelling() throws Exception {
-        Flow.Started s = flow.start("Bob", "s");
-        Resp cb = flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(), flow.shim.duo.completePrompt("bob")));
+        Resp cb = flow.callback(Flow.callbackRequest(s.txnCookie(), s.duoState(), flow.shim.duo.completePrompt("Bob")));
         String code = Flow.query(cb.redirect).get("code");
         assertEquals("Bob", flow.shim.ctx.codes().consume(code).orElseThrow().username());
     }

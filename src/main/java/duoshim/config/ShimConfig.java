@@ -46,6 +46,7 @@ public final class ShimConfig {
     private final int rateLimitPerUsername;
     private final int rateLimitSignPerIp;
     private final int rateLimitGrantPerIp;
+    private final int rateLimitSignFailuresPerIp;
     private final Duration transactionTtl;
     private final boolean cookieSecure;
     private final int storeMaxEntries;
@@ -63,6 +64,7 @@ public final class ShimConfig {
         rateLimitPerUsername = integer(p, "ratelimit.perUsername", 0, problems);
         rateLimitSignPerIp = integer(p, "ratelimit.sign.perIp", 0, problems);
         rateLimitGrantPerIp = integer(p, "ratelimit.grant.perIp", 0, problems);
+        rateLimitSignFailuresPerIp = integerOrDefault(p, "ratelimit.sign.failuresPerIp", 20, 0, problems);
         transactionTtl = Duration.ofSeconds(integerOrDefault(p, "transaction.ttlSeconds", 300, 30, problems));
         storeMaxEntries = integerOrDefault(p, "store.maxEntries", 10_000, 100, problems);
         cookieSecure = booleanOrDefault(p, "cookie.secure", true, problems);
@@ -237,6 +239,7 @@ public final class ShimConfig {
     public int rateLimitPerUsername() { return rateLimitPerUsername; }
     public int rateLimitSignPerIp() { return rateLimitSignPerIp; }
     public int rateLimitGrantPerIp() { return rateLimitGrantPerIp; }
+    public int rateLimitSignFailuresPerIp() { return rateLimitSignFailuresPerIp; }
     public Duration transactionTtl() { return transactionTtl; }
     public boolean cookieSecure() { return cookieSecure; }
     public int storeMaxEntries() { return storeMaxEntries; }
@@ -249,7 +252,8 @@ public final class ShimConfig {
                 + ", sspr.redirectUri=" + ssprRedirectUri + ", sspr.returnUrl=" + ssprReturnUrl
                 + ", userinfo.attribute=" + userinfoAttribute + ", ratelimit.windowSeconds=" + rateLimitWindow.toSeconds()
                 + ", ratelimit.perUsername=" + rateLimitPerUsername + ", ratelimit.sign.perIp=" + rateLimitSignPerIp
-                + ", ratelimit.grant.perIp=" + rateLimitGrantPerIp + ", transaction.ttlSeconds=" + transactionTtl.toSeconds()
+                + ", ratelimit.grant.perIp=" + rateLimitGrantPerIp
+                + ", ratelimit.sign.failuresPerIp=" + rateLimitSignFailuresPerIp + ", transaction.ttlSeconds=" + transactionTtl.toSeconds()
                 + ", cookie.secure=" + cookieSecure + ", store.maxEntries=" + storeMaxEntries + "}";
     }
 }

@@ -10,7 +10,7 @@ class SecurityHeadersFilterTest {
     @Test
     void setsNoStoreAndSecurityHeaders() {
         Resp r = new Resp();
-        SecurityHeadersFilter.apply(r.response, true);
+        SecurityHeadersFilter.apply(r.response);
         assertTrue(r.header("Cache-Control").contains("no-store"));
         assertEquals("no-cache", r.header("Pragma"));
         assertEquals("nosniff", r.header("X-Content-Type-Options"));
@@ -21,10 +21,11 @@ class SecurityHeadersFilterTest {
         assertNotNull(r.header("Strict-Transport-Security"));
     }
 
+    /** L2: also when TLS ends at a proxy or tunnel and Tomcat itself sees plain HTTP. */
     @Test
-    void noHstsOverPlainHttp() {
+    void hstsIsAlwaysSent() {
         Resp r = new Resp();
-        SecurityHeadersFilter.apply(r.response, false);
-        assertNull(r.header("Strict-Transport-Security"));
+        SecurityHeadersFilter.apply(r.response);
+        assertEquals("max-age=31536000", r.header("Strict-Transport-Security"));
     }
 }

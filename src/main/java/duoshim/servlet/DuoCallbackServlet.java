@@ -5,6 +5,7 @@ import duoshim.duo.DuoGatewayException;
 import duoshim.duo.DuoResult;
 import duoshim.model.IssuedCode;
 import duoshim.model.PendingTransaction;
+import duoshim.store.ExpiringStore;
 import duoshim.store.Secrets;
 import duoshim.store.StoreFullException;
 import duoshim.web.RedirectUris;
@@ -14,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static duoshim.web.Responses.errorPage;
 
@@ -42,32 +42,38 @@ public final class DuoCallbackServlet extends ShimServlet {
         String returnUrl = ctx.config().ssprReturnUrl();
 
         String txnId = GrantServlet.readTxnCookie(req);
-        // The transaction is single use whatever happens next.
-        GrantServlet.clearTxnCookie(resp, req.getContextPath(), ctx.config().cookieSecure());
         if (txnId == null) {
+            GrantServlet.clearTxnCookie(resp, req.getContextPath(), ctx.config().cookieSecure());
             ctx.audit().record(EVENT, null, "no_transaction_cookie", ip);
             errorPage(resp, HttpServletResponse.SC_BAD_REQUEST,
                     "This verification was not started in this browser, or cookies are blocked.", returnUrl);
             return;
         }
-        Optional<PendingTransaction> found = ctx.transactions().consume(txnId);
-        if (found.isEmpty()) {
+        // Only a response carrying this transaction's Duo state may use it up. A forged callback
+        // (for example another site sending the browser here mid-prompt) is rejected and leaves
+        // the pending transaction and its cookie intact, so the real Duo return still works.
+        String presentedState = req.getParameter("state");
+        ExpiringStore.Result<PendingTransaction> taken = ctx.transactions()
+                .consumeIf(txnId, t -> Secrets.constantTimeEquals(presentedState, t.duoState()));
+        if (taken.outcome() == ExpiringStore.Outcome.REJECTED) {
+            ctx.audit().record(EVENT, null, "state_mismatch", ip);
+            errorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "The verification response did not match this request.", returnUrl);
+            return;
+        }
+        // From here the transaction is gone (used now, expired or unknown): drop the cookie too.
+        GrantServlet.clearTxnCookie(resp, req.getContextPath(), ctx.config().cookieSecure());
+        if (taken.outcome() == ExpiringStore.Outcome.NOT_FOUND) {
             ctx.audit().record(EVENT, null, "unknown_or_expired_transaction", ip);
             errorPage(resp, HttpServletResponse.SC_BAD_REQUEST,
                     "This verification has expired or was already used. Start the password reset again.", returnUrl);
             return;
         }
-        PendingTransaction txn = found.get();
+        PendingTransaction txn = taken.value();
         String cancelUrl = ssprCancelUrl(txn.redirectUri(), txn.ssprState());
 
         if (req.getParameter("error") != null) {
             ctx.audit().record(EVENT, txn.username(), "duo_error", ip);
             errorPage(resp, HttpServletResponse.SC_FORBIDDEN, "Duo did not complete the verification.", cancelUrl);
-            return;
-        }
-        if (!Secrets.constantTimeEquals(req.getParameter("state"), txn.duoState())) {
-            ctx.audit().record(EVENT, txn.username(), "state_mismatch", ip);
-            errorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "The verification response did not match this request.", cancelUrl);
             return;
         }
         String duoCode = req.getParameter("duo_code");
@@ -91,8 +97,9 @@ public final class DuoCallbackServlet extends ShimServlet {
             errorPage(resp, HttpServletResponse.SC_FORBIDDEN, "Duo did not approve the verification.", cancelUrl);
             return;
         }
-        // Defence in depth: the SDK already checks preferred_username; check it again here.
-        if (result.verifiedUsername() == null || !result.verifiedUsername().equalsIgnoreCase(txn.username())) {
+        // Defence in depth: the SDK already requires preferred_username to equal the username
+        // exactly; check it again here with the same exact comparison.
+        if (result.verifiedUsername() == null || !result.verifiedUsername().equals(txn.username())) {
             ctx.audit().record(EVENT, txn.username(), "user_mismatch", ip);
             errorPage(resp, HttpServletResponse.SC_FORBIDDEN, "Duo verified a different user.", cancelUrl);
             return;

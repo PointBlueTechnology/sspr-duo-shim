@@ -44,6 +44,9 @@ ratelimit.perUsername=5
 ratelimit.sign.perIp=300
 # /oauth/grant is reached by users' browsers.
 ratelimit.grant.perIp=30
+# Optional: failed client-authentication attempts at /oauth/sign per IP per window (default 20).
+# Counted separately, so anonymous traffic can't use up SSPR's allowance behind a shared proxy address.
+#ratelimit.sign.failuresPerIp=20
 
 # --- Optional -----------------------------------------------------------------------------
 # How long a user has to finish the Duo prompt, in seconds (minimum 30).

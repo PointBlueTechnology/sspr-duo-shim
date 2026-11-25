@@ -94,9 +94,44 @@ Runtime dependencies are the Duo Universal SDK 1.4.0 and what it brings in (Retr
    duoshim.audit.handlers = 9duoshim.org.apache.juli.AsyncFileHandler
    duoshim.audit.useParentHandlers = false
    ```
-   (Keep your existing handlers in the `handlers =` list; `...` stands for them.)
+   (Keep your existing handlers in the `handlers =` list; `...` stands for them.) The `9duoshim.` prefix is Tomcat's way of naming a separate instance of a handler class: a leading digit, a name, then a dot, like the stock `1catalina.` and `2localhost.`. Any number not already used works, as long as it's the same on every line.
 5. **Restart Tomcat.** On success, `catalina.out` shows `duoshim started: ShimConfig{...}`, which lists no secrets. On any configuration problem it shows `duoshim startup aborted: <every problem found>` and the `/duoshim` context does not start.
-6. **Reverse proxy or load balancer.** The shim takes the source IP for rate limiting and audit from `request.getRemoteAddr()`. Behind a proxy, configure Tomcat's `RemoteIpValve` so this is the real client IP. The shim does not read `X-Forwarded-For` itself.
+6. **Reverse proxy, load balancer or tunnel.** See [Behind a reverse proxy or tunnel](#behind-a-reverse-proxy-or-tunnel).
+7. **Logging.** See [Logs and URLs](#logs-and-urls).
+
+### Behind a reverse proxy or tunnel
+
+The shim takes the source IP for rate limiting and the audit log from `request.getRemoteAddr()`. It never reads `X-Forwarded-For` itself, because anyone can send that header. Behind a proxy, load balancer or tunnel, `getRemoteAddr()` is the proxy's own address. Every user then shares one address, and each per-IP limit becomes a single limit for everyone. Configure Tomcat's `RemoteIpValve` (in `conf/server.xml`, inside `<Host>`) so Tomcat replaces the address with the real client IP, trusting the header **only** when the request comes from your proxy:
+
+```xml
+<!-- Generic reverse proxy that sets X-Forwarded-For and X-Forwarded-Proto -->
+<Valve className="org.apache.catalina.valves.RemoteIpValve"
+       internalProxies="10\.0\.0\.5"
+       remoteIpHeader="X-Forwarded-For"
+       protocolHeader="X-Forwarded-Proto" />
+```
+
+```xml
+<!-- Cloudflare Tunnel: cloudflared connects from this address; Cloudflare sets CF-Connecting-IP -->
+<Valve className="org.apache.catalina.valves.RemoteIpValve"
+       internalProxies="127\.0\.0\.1|0:0:0:0:0:0:0:1"
+       remoteIpHeader="CF-Connecting-IP"
+       protocolHeader="X-Forwarded-Proto" />
+```
+
+`internalProxies` is a regular expression matching only your proxy's address. The valve applies to every webapp in the `<Host>`, so SSPR gets real client IPs too, which its own intruder detection needs.
+
+Without the valve, the shim still protects SSPR's own calls: `/oauth/sign` checks client authentication before any per-IP limit, and failed attempts count against a separate per-IP budget (`ratelimit.sign.failuresPerIp`). Anonymous traffic therefore can't use up SSPR's allowance. The browser-facing limit on `/oauth/auth` still needs real client IPs to be meaningful.
+
+### Logs and URLs
+
+The shim's own logs never contain handles, codes, tokens or secrets. These values do travel in URLs, though: the handle (`parameters`), SSPR's `state`, Duo's `duo_code`, and the authorization `code` on the way back to SSPR. Anything that logs full request URLs can capture them while they're still valid (minutes at most):
+
+- **Tomcat access log.** The default `AccessLogValve` pattern logs `%r`, the request line including the query string. Use a pattern without the query string, for example `pattern="%h %l %u %t &quot;%m %U %H&quot; %s %b"` (`%U` is the path only).
+- **SSPR's own log.** At TRACE or DEBUG level, SSPR writes the OAuth return URL, including `code` and `state`. Keep SSPR at INFO outside test systems.
+- **Proxies and tunnels** may log URLs too. Check their settings.
+
+A code alone can't be redeemed: `/oauth/token` also requires the SSPR client secret.
 
 ## Duo setup
 
@@ -243,7 +278,7 @@ Start with the shim's audit log (`event=… user="…" result=… ip=…`) and `
 | Shim page *Duo verification is unavailable*; audit `duo_unavailable` | Shim can't reach `duo.apiHost`, TLS interception, wrong Duo credentials | `curl https://<apiHost>` from the shim server; check proxy exemptions; check the Duo values. |
 | Shim page *not started in this browser, or cookies are blocked*; audit `no_transaction_cookie` | Login URL host differs from the `duo.redirectUri` host, cookies blocked, or `cookie.secure=true` over plain HTTP | Use one host name for both; use HTTPS. |
 | Duo prompt shows *user not found / not enrolled*, or audit `denied` | Duo username differs from the injected value, or New User policy = Deny for an unenrolled user | Fix the macro or the Duo username/alias; enrol the user. |
-| Audit `user_mismatch` | Duo normalised the username differently from what SSPR sent | Check Duo username normalisation; send the normalised form. |
+| Audit `duo_exchange_failed` after the user approved in Duo (or, rarely, `user_mismatch`) | The username Duo returns must equal the one SSPR sent **exactly, including case**. The Duo SDK enforces this, and the shim checks it again. Duo username normalisation, or a differently cased *Inject User Name Value*, breaks the match. | Make the macro produce the username exactly as Duo stores it; check Duo's username normalisation setting. |
 | Audit `state_mismatch` | Two Duo prompts in one browser (the newest cookie wins), or a tampered callback | Finish one reset at a time. |
 | Duo approves, then SSPR shows the username screen again. Audit has `duo_callback … result=allow` but no `token` line; SSPR log: `read state … match=false` / `response is not for a request issued during the current session` | The reset was started on a different host name (IP address, short name, old name) than SSPR's **Site URL**. SSPR sends the browser back to the Site URL host, where the browser has no SSPR session cookie. | Open SSPR only at the Site URL host, for example `https://sspr-test.pointbluetech.com:8443/sspr/public/forgottenpassword`. Optionally redirect other names to it at the proxy. |
 | After an unfinished attempt (Duo denied an unenrolled user, or the Duo window was closed), the shim shows *Your last Duo verification did not finish*; audit `repeat_choice` | Expected. SSPR keeps the forgotten-password attempt open and sends the user straight back to the shim. Duo's deny page never returns, so SSPR doesn't know the attempt ended. | *Start over* (via `/oauth/startover`) voids the attempt, clears the shim's cookie and returns to SSPR's username page through SSPR's cancel path. *Try Duo again* opens a fresh Duo prompt. If the user just leaves, the next reset in that browser within 5 minutes also sees this page once. |
@@ -270,6 +305,7 @@ How SSPR's OAuth client behaves for the Forgotten Password method, by version, a
 **Notes:**
 - On 4.7 and 4.8 the OAuth Login URL must end in `/auth`. The `/grant` form only works on 4.5.
 - The shim never returns an `id_token`, so 4.8 always takes the username from `/oauth/userinfo` and the Forgotten Password profile's attribute name.
+- *Start over* on the *did not finish* page relies on SSPR treating `error=access_denied&sub_error=usrcan` as a user cancel, which clears the forgotten-password attempt. This is confirmed on 4.8.0.600 only. If another version shows an OAuth error instead, the user needs a new browser session (or to wait about 5 minutes for SSPR's session to expire).
 
 **Tested end to end** on SSPR 4.8.0.600 (Tomcat 9.0.124, Java 11) with a real Duo Web SDK application: approved push, unenrolled user, denied push, timed-out push, and *Start over* after an unfinished attempt.
 

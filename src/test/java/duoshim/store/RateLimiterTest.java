@@ -38,6 +38,19 @@ class RateLimiterTest {
     }
 
     @Test
+    void isLimitedDoesNotCount() {
+        RateLimiter r = new RateLimiter(2, Duration.ofMinutes(5), clock);
+        for (int i = 0; i < 10; i++) {
+            assertFalse(r.isLimited("k"));
+        }
+        assertTrue(r.tryAcquire("k"));
+        assertTrue(r.tryAcquire("k"));
+        assertTrue(r.isLimited("k"));
+        clock.advance(Duration.ofMinutes(5));
+        assertFalse(r.isLimited("k"));
+    }
+
+    @Test
     void zeroDisables() {
         RateLimiter r = new RateLimiter(0, Duration.ofMinutes(5), clock);
         for (int i = 0; i < 100; i++) {

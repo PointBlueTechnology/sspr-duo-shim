@@ -150,6 +150,7 @@ class GrantServletTest {
         assertEquals(429, r.status);
         assertNull(r.redirect);
         assertTrue(flow.shim.audited("grant", "rate_limited_user"));
+        assertTrue(flow.shim.ctx.handles().peek(h).isPresent(), "a refused request does not use up the handle (L6)");
     }
 
     @Test

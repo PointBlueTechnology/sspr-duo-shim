@@ -88,6 +88,27 @@ class SignServletTest {
         assertEquals(200, flow.sign(signed(Flow.data("alice"))).status);
     }
 
+    /** H1: anonymous failures from a shared address (proxy, tunnel) must not block SSPR's own calls. */
+    @Test
+    void anonymousFailuresCannotUseUpSsprAllowance() throws Exception {
+        Properties p = TestShim.baseProperties();
+        p.setProperty("ratelimit.sign.perIp", "3");
+        p.setProperty("ratelimit.sign.failuresPerIp", "2");
+        Flow f = new Flow(new TestShim(p));
+        String shared = "127.0.0.1";
+        assertEquals(401, f.sign(new Req().ip(shared).param("data", Flow.data("x"))).status);
+        assertEquals(401, f.sign(new Req().ip(shared).basic(SSPR_CLIENT_ID, "wrong-secret-xxxxxx").param("data", Flow.data("x"))).status);
+        for (int i = 0; i < 50; i++) {
+            assertEquals(429, f.sign(new Req().ip(shared).param("data", Flow.data("x"))).status);
+        }
+        assertTrue(f.shim.audited("sign", "rate_limited_failures_ip"));
+        // SSPR, behind the same address, still gets its full allowance.
+        for (int i = 0; i < 3; i++) {
+            assertEquals(200, f.sign(signed(Flow.data("user" + i)).ip(shared)).status);
+        }
+        assertEquals(429, f.sign(signed(Flow.data("user9")).ip(shared)).status, "SSPR's own per-IP limit still applies");
+    }
+
     @Test
     void perIpRateLimit() throws Exception {
         Properties p = TestShim.baseProperties();
