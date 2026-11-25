@@ -110,12 +110,25 @@ public final class ShimConfig {
                 problems.add("missing required key '" + key + "'");
             }
         }
+        rejectPlaceholders(props, problems);
         ShimConfig c = new ShimConfig(props, problems);
         c.validate(problems);
         if (!problems.isEmpty()) {
             throw new ConfigException("invalid duoshim configuration: " + String.join("; ", problems));
         }
         return c;
+    }
+
+    /** Marker used for every value in duoshim.properties.example that must be replaced. */
+    static final String PLACEHOLDER = "CHANGE_ME";
+
+    private static void rejectPlaceholders(Properties props, List<String> problems) {
+        for (String key : new java.util.TreeSet<>(props.stringPropertyNames())) {
+            String v = props.getProperty(key);
+            if (v != null && v.toUpperCase(Locale.ROOT).contains(PLACEHOLDER)) {
+                problems.add(key + " still contains the " + PLACEHOLDER + " placeholder from the example file");
+            }
+        }
     }
 
     private void validate(List<String> problems) {

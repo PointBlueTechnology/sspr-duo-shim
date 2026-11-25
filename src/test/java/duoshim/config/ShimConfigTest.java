@@ -96,6 +96,24 @@ class ShimConfigTest {
     }
 
     @Test
+    void shippedExampleFileIsRejectedUntilEveryPlaceholderIsReplaced() {
+        ConfigException e = assertThrows(ConfigException.class,
+                () -> ShimConfig.load(Path.of("duoshim.properties.example"), "test"));
+        for (String key : new String[]{"duo.clientId", "duo.clientSecret", "duo.apiHost", "duo.redirectUri",
+                "sspr.clientSecret", "sspr.redirectUri"}) {
+            assertTrue(e.getMessage().contains(key + " still contains the CHANGE_ME placeholder"),
+                    () -> key + " should be reported: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void anyLeftoverPlaceholderIsRejected() {
+        Properties p = base();
+        p.setProperty("sspr.clientSecret", "change_me-but-long-enough-to-pass");
+        assertTrue(problems(p).contains("sspr.clientSecret still contains the CHANGE_ME placeholder"));
+    }
+
+    @Test
     void toStringHasNoSecrets() throws Exception {
         String s = ShimConfig.fromProperties(base()).toString();
         assertFalse(s.contains(TestShim.SSPR_SECRET));
