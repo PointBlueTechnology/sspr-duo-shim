@@ -110,6 +110,9 @@ public final class GrantServlet extends ShimServlet {
         } catch (DuoGatewayException | RuntimeException e) {
             ctx.audit().record(EVENT, username, "duo_unavailable", ip);
             LOG.warning("duoshim: Duo unavailable during grant: " + e.getMessage());
+            if (repeat) {
+                clearTxnCookie(resp, req.getContextPath(), ctx.config().cookieSecure());
+            }
             errorPage(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE,
                     "Duo verification is unavailable right now. Try again later.", cancelUrl);
             return;
@@ -120,18 +123,23 @@ public final class GrantServlet extends ShimServlet {
             txnId = ctx.transactions().put(new PendingTransaction(username, state, redirectUri, duoState, nonce));
         } catch (StoreFullException e) {
             ctx.audit().record(EVENT, username, "store_full", ip);
+            if (repeat) {
+                clearTxnCookie(resp, req.getContextPath(), ctx.config().cookieSecure());
+            }
             errorPage(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "The service is busy. Try again shortly.", cancelUrl);
             return;
         }
         setTxnCookie(resp, req.getContextPath(), txnId, (int) ctx.config().transactionTtl().toSeconds(), ctx.config().cookieSecure());
         if (repeat) {
-            // Let the user choose instead of looping into Duo again. "Start over" is SSPR's own
-            // cancel path, which clears the forgotten-password state and shows the username page.
+            // Let the user choose instead of looping into Duo again. "Start over" goes through the
+            // shim, which voids this transaction and clears the cookie, then to SSPR's own cancel
+            // path, which clears the forgotten-password state and shows the username page.
             ctx.audit().record(EVENT, username, "repeat_choice", ip);
             choicePage(resp, "Your last Duo verification did not finish",
                     "Duo did not send you back after your previous attempt. This happens when Duo denies access "
                             + "(for example, if you are not enrolled in Duo) or when the Duo window was closed.",
-                    "Try Duo again", authUrl, "Start over", cancelUrl);
+                    "Try Duo again", authUrl, "Start over",
+                    req.getContextPath() + "/oauth/startover?t=" + StartOverServlet.token(txnId));
             return;
         }
         ctx.audit().record(EVENT, username, "redirect_to_duo", ip);

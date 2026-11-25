@@ -40,7 +40,7 @@ The shim's output is an assertion to SSPR: "Duo verified this user." SSPR acts o
 - **Single node.** State is in memory. There is no replication, and restarts drop in-flight transactions (fail closed). See README ▸ Clustering.
 - **Source IP behind proxies.** Rate limits use `getRemoteAddr()`. Without Tomcat's `RemoteIpValve`, every user appears as the proxy's IP, and the per-IP limit then applies to everyone together.
 - **One prompt per browser.** A second reset started in the same browser replaces the first one's cookie. The first then fails closed.
-- **Attempts that never return.** Duo's deny page (for example for an unenrolled user) ends at Duo, so SSPR never learns the attempt is over and keeps sending the user back. When `/oauth/auth` sees a transaction cookie from such an attempt, it voids that transaction and shows a page with *Try Duo again* or *Start over*. *Start over* is SSPR's own cancel path. Neither link carries a code.
+- **Attempts that never return.** Duo's deny page (for example for an unenrolled user) ends at Duo, so SSPR never learns the attempt is over and keeps sending the user back. When `/oauth/auth` sees a transaction cookie from such an attempt, it voids that transaction and shows a page with *Try Duo again* or *Start over*. *Start over* goes to `/oauth/startover`. That endpoint voids the new transaction and clears the cookie, then redirects to SSPR's own cancel path. It builds that redirect from the stored transaction, never from request parameters. It also requires a `t` value derived from the transaction cookie, so another site can't cancel a user's attempt by linking to it. Neither link carries a code.
 
 ## Reporting
 

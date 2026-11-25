@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static duoshim.testsupport.TestShim.SSPR_REDIRECT;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -45,8 +44,8 @@ class RepeatAttemptTest {
         assertTrue(r.body().contains(">Try Duo again</a>"));
         assertTrue(r.body().contains("href=\"https://api-test.duosecurity.com/"));
         assertTrue(r.body().contains(">Start over</a>"));
-        assertTrue(r.body().contains(SSPR_REDIRECT + "?error=access_denied&amp;sub_error=usrcan&amp;state=state-2"),
-                "Start over uses SSPR's cancel path with the current SSPR state");
+        assertTrue(r.body().contains("href=\"/duoshim/oauth/startover?t="),
+                "Start over goes through the shim so it can clear its cookie");
         assertFalse(r.body().contains("code="), "never carries an authorization code");
         assertTrue(flow.shim.audited("grant", "repeat_choice"));
     }
