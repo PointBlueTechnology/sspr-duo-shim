@@ -11,7 +11,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class RateLimiter {
 
-    private record Window(long startMillis, int count) {
+    private static final class Window {
+        private final long startMillis;
+        private final int count;
+
+        Window(long startMillis, int count) {
+            this.startMillis = startMillis;
+            this.count = count;
+        }
+
+        long startMillis() {
+            return startMillis;
+        }
+
+        int count() {
+            return count;
+        }
     }
 
     private final int limit;

@@ -17,7 +17,22 @@ public final class ExpiringStore<V> {
     /** Longest key accepted by {@link #consume}; anything longer cannot be one of ours. */
     static final int MAX_KEY_LENGTH = 256;
 
-    private record Entry<V>(V value, Instant expires) {
+    private static final class Entry<V> {
+        private final V value;
+        private final Instant expires;
+
+        Entry(V value, Instant expires) {
+            this.value = value;
+            this.expires = expires;
+        }
+
+        V value() {
+            return value;
+        }
+
+        Instant expires() {
+            return expires;
+        }
     }
 
     private final String name;

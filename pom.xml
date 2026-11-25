@@ -12,7 +12,10 @@
     <description>OAuth shim between OpenText SSPR forgotten-password OAuth and the Duo Universal Prompt (Web SDK v4)</description>
 
     <properties>
-        <maven.compiler.release>17</maven.compiler.release>
+        <!-- Runs on Java 11+, the JVM SSPR 4.7/4.8 Tomcat ships with. Tests use newer syntax and
+             are compiled for 17, so building (mvn package) needs JDK 17+. -->
+        <maven.compiler.release>11</maven.compiler.release>
+        <maven.compiler.testRelease>17</maven.compiler.testRelease>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <duo.sdk.version>1.4.0</duo.sdk.version>
         <!-- The Duo SDK's converter-jackson asks for 2.17.0; pinned to the same 2.17 line because the shim uses Jackson directly. -->

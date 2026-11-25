@@ -51,7 +51,7 @@ The username that comes back to SSPR is always the one SSPR registered in step 1
 
 ## Build
 
-Requires JDK 17 and Maven 3.9+.
+Building requires **JDK 17+** and Maven 3.9+ (the unit tests are compiled for Java 17).
 
 ```bash
 mvn clean package
@@ -59,7 +59,7 @@ mvn clean package
 
 The output is `target/duoshim.war`. It targets **javax.servlet 4.0 (Tomcat 9)**, the same container generation as SSPR 4.8.0.600, whose WAR is compiled against `javax.servlet`. A Tomcat 10+ (`jakarta.*`) deployment would need a jakarta build of the shim.
 
-The compiled code needs a **Java 17 or newer** runtime. Check the JVM that runs SSPR's Tomcat (`bin/version.sh`). If it is Java 11, run the shim's Tomcat on 17+, or change `maven.compiler.release` to 11 in `pom.xml`. The code uses Java 17 features (records, switch expressions), so building for 11 also means rewriting those.
+The WAR itself runs on **Java 11 or newer**: the shim is compiled with `--release 11`, and every bundled library targets Java 8 or 9. SSPR 4.8.0.600 is itself compiled for Java 11, and the lab's SSPR 4.7 Tomcat runs on OpenJDK 11.0.19, so the shim can share SSPR's Tomcat. Smoke-tested on Tomcat 9.0.86 with Java 11.0.20 and Java 17.
 
 Runtime dependencies are the Duo Universal SDK 1.4.0 and what it brings in (Retrofit, OkHttp, Jackson, java-jwt). There is no web framework.
 
@@ -102,7 +102,7 @@ In the SSPR configuration editor, open **Settings ▸ Modules ▸ Public ▸ For
 
 | SSPR setting | Value |
 |---|---|
-| OAuth Login URL | **SSPR 4.8:** `{base}/duoshim/oauth/auth` · SSPR 4.5: `{base}/duoshim/oauth/grant` |
+| OAuth Login URL | **SSPR 4.7 and 4.8:** `{base}/duoshim/oauth/auth` · SSPR 4.5: `{base}/duoshim/oauth/grant` |
 | OAuth Code Resolve Service URL | `{base}/duoshim/oauth/token` |
 | OAuth Profile Service URL | `{base}/duoshim/oauth/userinfo` |
 | OAuth Client ID | same as `sspr.clientId` |
@@ -113,7 +113,7 @@ In the SSPR configuration editor, open **Settings ▸ Modules ▸ Public ▸ For
 | OAuth Web Service Server Certificate | The shim's TLS certificate (or its CA), if SSPR doesn't already trust it. SSPR calls the shim over HTTPS. |
 | Add login hint optional parameter… | Blank (the shim ignores it). |
 
-Why the Login URL ends in `/auth` on 4.8: SSPR 4.8 builds the `/sign` URL by keeping everything up to the last `/auth` in the Login URL and appending `sign`. `{base}/duoshim/oauth/auth` therefore gives `{base}/duoshim/oauth/sign`. With a Login URL ending in `/grant`, SSPR 4.8 computes a sign URL of just `sign` and the reset fails. SSPR 4.5 instead replaced `/grant` with `/sign`. The shim serves both `/oauth/auth` and `/oauth/grant`.
+Why the Login URL ends in `/auth` on 4.7 and 4.8: SSPR 4.8 builds the `/sign` URL by keeping everything up to the last `/auth` in the Login URL and appending `sign`. `{base}/duoshim/oauth/auth` therefore gives `{base}/duoshim/oauth/sign`. With a Login URL ending in `/grant`, SSPR 4.8 computes a sign URL of just `sign` and the reset fails. SSPR 4.5 instead replaced `/grant` with `/sign`. The shim serves both `/oauth/auth` and `/oauth/grant`.
 
 3. **Elsewhere in SSPR:**
    - **Settings ▸ Application ▸ Application ▸ Site URL** must be set. SSPR builds its OAuth return address as `<Site URL>/public/oauth`, and `sspr.redirectUri` must equal it **exactly** (scheme, host, port, path, no trailing slash). The `oauth.returnUrlOverride` app property, if set, takes precedence over the Site URL.
@@ -191,6 +191,8 @@ The SSPR client behaviour was taken from disassembled `OAuthMachine`, `OAuthSett
 - The brief described the `/grant` → `/sign` rule. That is 4.5 only; 4.8 needs a Login URL ending in `/auth`.
 - The brief had userinfo as POST only. 4.8 can send GET.
 - The token response must not include `id_token`, because of 4.8's OIDC branch.
+
+**SSPR 4.7.0.0** (lab, `sspr-server-4.7.0.0.jar`) was checked by its class-file strings only, not decompiled. Its `OAuthMachine` has the 4.8-style `/auth` (`lastIndexOf`) derivation, no `/grant` replace, no `id_token` handling, and POST-only userinfo, so the 4.8 settings above apply.
 
 **Not verified:**
 - A live end-to-end run against SSPR 4.8 and Duo. The tests use a fake Duo and simulated requests.

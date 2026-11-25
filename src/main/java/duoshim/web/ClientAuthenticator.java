@@ -14,7 +14,23 @@ import java.util.Optional;
  */
 public final class ClientAuthenticator {
 
-    public record Credentials(String clientId, String clientSecret) {
+    public static final class Credentials {
+        private final String clientId;
+        private final String clientSecret;
+
+        public Credentials(String clientId, String clientSecret) {
+            this.clientId = clientId;
+            this.clientSecret = clientSecret;
+        }
+
+        public String clientId() {
+            return clientId;
+        }
+
+        public String clientSecret() {
+            return clientSecret;
+        }
+
         @Override
         public String toString() {
             return "Credentials{clientId=" + clientId + ", clientSecret=<redacted>}";
