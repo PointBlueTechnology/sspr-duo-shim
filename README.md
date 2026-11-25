@@ -15,6 +15,7 @@ SSPR's *External OAuth Authentication* verification method expects an OAuth serv
 - [Troubleshooting](#troubleshooting)
 - [SSPR compatibility](#sspr-compatibility)
 - [Security](SECURITY.md)
+- [License](#license)
 
 ## How it works
 
@@ -277,3 +278,9 @@ How SSPR's OAuth client behaves for the Forgotten Password method, by version, a
 - SSPR 4.5 and 4.7, and 4.8 builds other than 4.8.0.600.
 - How SSPR's HTTP client handles the shim's TLS certificate without *OAuth Web Service Server Certificate* set.
 - The exact effect of Duo username normalisation on `preferred_username`.
+
+## License
+
+[MIT](LICENSE). Copyright (c) 2026 PointBlue Technology.
+
+`duoshim.war` also bundles third-party libraries under their own licenses: the Duo Universal SDK, Jackson, Retrofit, OkHttp, Okio and java-jwt. If you redistribute the WAR, include their notices as their licenses require.
